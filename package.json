@@ -1,0 +1,16 @@
+{
+  "name": "isoq",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "isoq": "src/main/isoq-cli.js"
+  },
+  "main": "src/main/main.js",
+  "dependencies": {
+    "esbuild": "^0.19.2",
+    "preact": "^10.17.1",
+    "preact-render-to-string": "^6.2.1",
+    "yargs": "^17.7.2"
+  }
+}
