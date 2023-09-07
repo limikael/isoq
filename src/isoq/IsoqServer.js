@@ -1,9 +1,9 @@
-import {render as renderToString} from "preact-render-to-string";
 import React from "preact/compat";
 import Browser from "@browser";
 import clientSource from "@clientSource";
 import {createElement} from "react";
-import {IsoContext} from "../components/isomorphic.js";
+import IsoqSsr from "./IsoqSsr.js";
+import {render as renderToString} from "preact-render-to-string";
 
 export default class IsoqServer {
 	async handleRequest(req, localFetch) {
@@ -16,45 +16,11 @@ export default class IsoqServer {
 			});
 		}
 
-		let head="";
-		let renderResult;
-		let isoContext=new IsoContext();
+		let ssr=new IsoqSsr(Browser,req,localFetch);
+		let content=await ssr.render();
 
-		function doRenderPass() {
-			global.__headChildren=undefined;
-			global.location=new URL(req.url);
-			global.__localFetch=localFetch;
-			renderResult=isoContext.with(()=>renderToString(createElement(Browser)));
-			if (global.__headChildren)
-				head=renderToString(global.__headChildren);
-		}
-
-		doRenderPass();
-		if (isoContext.hasPromises()) {
-			await isoContext.wait();
-			doRenderPass();
-		}
-
-		if (!renderResult)
+		if (!content)
 			return;
-
-		let content=`
-			<!DOCTYPE html>
-			<html>
-				<head>
-					<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-					<meta charset="utf-8"/>
-					${head}
-				</head>
-				<body style="margin: 0">
-					<div id="isoq">
-						${renderResult}
-					</div>
-					<script>window.__isoData=${JSON.stringify(isoContext.data)}</script>
-					<script src="/client.js" type="module"></script>
-				</body>
-			</html>
-		`;
 
 		return new Response(content,{
 			headers: {

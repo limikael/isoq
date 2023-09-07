@@ -1,6 +1,13 @@
-export default function Head({children}) {
-	if (typeof window==="undefined")
-		global.__headChildren=children;
+import {useId} from "react";
+import {useIsoContext} from "../isoq/IsoContext.js";
+
+export function Head({children}) {
+	let isoContext=useIsoContext();
+
+	if (isoContext.isSsr())
+		isoContext.headChildren=children;
 
 	return "";
 }
+
+export default Head;

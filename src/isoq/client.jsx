@@ -1,5 +1,11 @@
 import Browser from "@browser";
+import IsoqClient from "./IsoqClient.js";
+import IsoContext from "./IsoContext.js";
 
-if (typeof window!=="undefined") {
-	hydrate(<Browser/>,document.getElementById("isoq"));
-}
+let isoClient=new IsoqClient(window.__isoData);
+let content=(
+	<IsoContext.Provider value={isoClient}>
+		<Browser />
+	</IsoContext.Provider>
+)
+hydrate(content,document.getElementById("isoq"));
