@@ -25,8 +25,11 @@ let yargsConf=yargs(hideBin(process.argv))
         type: "boolean",
     })
     .option("outdir",{
-        description: "Generate middleware in this directory. ",
+        description: "Generate middleware in this directory.",
         default: "node_modules/__ISOQ_MIDDLEWARE"
+    })
+    .options("quiet",{
+        description: "Suppress output.",
     })
     .strictOptions()
     .usage("isoq -- Isomorphic javascript middleware generator.")

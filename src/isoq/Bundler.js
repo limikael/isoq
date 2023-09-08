@@ -25,7 +25,7 @@ export default class Bundler {
 		if (this.contentdir) {
 			fs.mkdirSync(this.contentdir,{recursive: true});
 			if (this.purgeOldJs) {
-				console.log("Removing .js files in "+this.contentdir);
+				this.log("Removing .js files in "+this.contentdir);
 				for (let file of await fs.readdirSync(this.contentdir)) {
 					if (file.endsWith(".js"))
 						await fs.unlinkSync(path.join(this.contentdir,file));
@@ -43,7 +43,7 @@ export default class Bundler {
 		if (this.splitting && !this.contentdir)
 			throw new Error("Code splitting requires contentdir.");
 
-		console.log("Bundling client...");
+		this.log("Bundling client...");
 		await esbuild.build({
 			...commonBuildOptions,
 			entryPoints: [path.join(__dirname,"./client.jsx")],
@@ -70,7 +70,7 @@ export default class Bundler {
 		let content=`export default ${JSON.stringify(source)};`;
 		fs.writeFileSync(path.join(this.outdir,"client.src.js"),content);
 
-		console.log("Bundling middleware...");
+		this.log("Bundling middleware...");
 		await esbuild.build({
 			...commonBuildOptions,
 			entryPoints: [path.join(__dirname,"../mw/isoq-hono.js")],
@@ -89,11 +89,16 @@ export default class Bundler {
 			],
 		});
 
-		console.log("Middleware generated in: "+this.outdir);
+		this.log("Middleware generated in: "+this.outdir);
 		if (this.contentdir)
-			console.log("Client javascript assets in: "+this.contentdir);
+			this.log("Client javascript assets in: "+this.contentdir);
 
 		else
-			console.log("The middleware includes javascript assets.")
+			this.log("The middleware includes javascript assets.")
+	}
+
+	log(...args) {
+		if (!this.quiet)
+			console.log(...args);
 	}
 }

@@ -6,7 +6,7 @@ import IsoqSsr from "./IsoqSsr.js";
 import {render as renderToString} from "preact-render-to-string";
 
 export default class IsoqServer {
-	async handleRequest(req, localFetch) {
+	async handleRequest(req, localFetch, props) {
 		if (new URL(req.url).pathname=="/client.js"
 				&& clientSource) {
 			return new Response(clientSource,{
@@ -16,7 +16,7 @@ export default class IsoqServer {
 			});
 		}
 
-		let ssr=new IsoqSsr(Browser,req,localFetch);
+		let ssr=new IsoqSsr(Browser,req,localFetch,props);
 		let content=await ssr.render();
 
 		if (!content)

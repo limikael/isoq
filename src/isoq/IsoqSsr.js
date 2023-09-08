@@ -3,15 +3,19 @@ import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "react";
 
 export default class IsoqSsr {
-	constructor(root,req,localFetch) {
+	constructor(root, req, localFetch, props) {
 		this.req=req;
 		this.localFetch=localFetch;
 		this.promises={};
 		this.data={};
+		this.props=props;
+		if (typeof this.props=="function")
+			this.props=this.props(req);
+
 		this.element=createElement(
 			IsoContext.Provider,
 			{value: this},
-			createElement(root)
+			createElement(root,this.props)
 		);
 	}
 
@@ -65,7 +69,7 @@ export default class IsoqSsr {
 					<div id="isoq">
 						${renderResult}
 					</div>
-
+					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
 					<script>window.__isoData=${JSON.stringify(this.data)}</script>
 					<script src="/client.js" type="module"></script>
 				</body>
