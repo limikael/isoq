@@ -19,6 +19,10 @@ export default class IsoqSsr {
 		);
 	}
 
+	getUrl() {
+		return this.req.url;
+	}
+
 	async fetch(url, options={}) {
 		if (url.startsWith("/")) {
 			url=new URL(this.req.url).origin+url;
@@ -39,7 +43,7 @@ export default class IsoqSsr {
 	}
 
 	hasPromises() {
-		return (Object.keys(this.promises).length>0);
+		return (Object.keys(this.promises).length>Object.keys(this.data).length);
 	}
 
 	renderPass() {
@@ -50,7 +54,7 @@ export default class IsoqSsr {
 
 	async render() {
 		let renderResult=this.renderPass();
-		if (this.hasPromises()) {
+		while (this.hasPromises()) {
 			await this.wait();
 			renderResult=this.renderPass();
 		}
