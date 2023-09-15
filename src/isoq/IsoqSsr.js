@@ -19,11 +19,20 @@ export default class IsoqSsr {
 		);
 	}
 
+	redirect(targetUrl) {
+		let headers=new Headers();
+		headers.set("location",targetUrl);
+		this.response=new Response("Moved",{
+			status: 302,
+			headers: headers
+		});
+	}
+
 	getUrl() {
 		return this.req.url;
 	}
 
-	async fetch(url, options={}) {
+	fetch=async (url, options={})=> {
 		if (url.startsWith("/")) {
 			url=new URL(this.req.url).origin+url;
 			let req=new Request(url,options);
@@ -79,5 +88,21 @@ export default class IsoqSsr {
 				</body>
 			</html>
 		`;
+	}
+
+	async getResponse() {
+		let content=await this.render();
+
+		if (this.response)
+			return this.response;
+
+		if (!content)
+			return;
+
+		return new Response(content,{
+			headers: {
+				"Content-Type": "text/html"
+			}
+		});
 	}
 }

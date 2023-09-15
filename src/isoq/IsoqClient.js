@@ -16,7 +16,7 @@ export default class IsoqClient {
 		return window.location;
 	}
 
-	async fetch(url,options={}) {
+	fetch=async (url,options={})=>{
 		if (url.startsWith("/"))
 			url=new URL(this.req.url).origin+url;
 

@@ -17,15 +17,6 @@ export default class IsoqServer {
 		}
 
 		let ssr=new IsoqSsr(Browser,req,localFetch,props);
-		let content=await ssr.render();
-
-		if (!content)
-			return;
-
-		return new Response(content,{
-			headers: {
-				"Content-Type": "text/html"
-			}
-		});
+		return await ssr.getResponse();
 	}
 }
