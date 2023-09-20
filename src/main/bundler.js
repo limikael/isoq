@@ -4,7 +4,8 @@ export default async function bundler(options) {
 	let bundler=new Bundler({
 		...{
 			outdir: "node_modules/__ISOQ_MIDDLEWARE",
-			minify: true
+			minify: true,
+			mw: "hono"
 		},
 		browser: options.entryPoint,
 		...options

@@ -16,11 +16,6 @@ export default class Bundler {
 			fs.rmSync(this.outdir,{recursive: true});
 
 		fs.mkdirSync(this.outdir,{recursive: true});
-		fs.writeFileSync(path.join(this.outdir,"package.json"),JSON.stringify({
-			name: "__ISOQ_MIDDLEWARE",
-			type: "module",
-			main: "isoq-hono.js"
-		}));
 
 		if (this.contentdir) {
 			fs.mkdirSync(this.contentdir,{recursive: true});
@@ -70,31 +65,50 @@ export default class Bundler {
 		let content=`export default ${JSON.stringify(source)};`;
 		fs.writeFileSync(path.join(this.outdir,"client.src.js"),content);
 
-		this.log("Bundling middleware...");
-		await esbuild.build({
-			...commonBuildOptions,
-			entryPoints: [path.join(__dirname,"../mw/isoq-hono.js")],
-			outdir: this.outdir,
-			bundle: true,
-			minify: this.minify,
-			//sourcemap: true,
-			plugins: [
-				moduleAlias({
-					"@browser": path.resolve(this.browser),
-					"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
-					"react": "preact/compat",
-					"react-dom": "preact/compat",
-					"react/jsx-runtime": "preact/jsx-runtime"
-				})
-			],
-		});
+		if (this.mw && this.mw!="none") {
+			this.log("Bundling "+this.mw+" middleware...");
+			let mwSource;
+			switch (this.mw) {
+				case "hono":
+					mwSource="isoq-hono.js";
+					break;
 
-		this.log("Middleware generated in: "+this.outdir);
-		if (this.contentdir)
-			this.log("Client javascript assets in: "+this.contentdir);
+				case "raw":
+					mwSource="isoq-raw.js";
+					break;
+			}
 
-		else
-			this.log("The middleware includes javascript assets.")
+			fs.writeFileSync(path.join(this.outdir,"package.json"),JSON.stringify({
+				name: "__ISOQ_MIDDLEWARE",
+				type: "module",
+				main: mwSource
+			}));
+
+			await esbuild.build({
+				...commonBuildOptions,
+				entryPoints: [path.join(__dirname,"../mw",mwSource)],
+				outdir: this.outdir,
+				bundle: true,
+				minify: this.minify,
+				//sourcemap: true,
+				plugins: [
+					moduleAlias({
+						"@browser": path.resolve(this.browser),
+						"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
+						"react": "preact/compat",
+						"react-dom": "preact/compat",
+						"react/jsx-runtime": "preact/jsx-runtime"
+					})
+				],
+			});
+
+			this.log("Middleware generated in: "+this.outdir);
+			if (this.contentdir)
+				this.log("Client javascript assets in: "+this.contentdir);
+
+			else
+				this.log("The middleware includes javascript assets.")
+		}
 	}
 
 	log(...args) {

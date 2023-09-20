@@ -18,6 +18,12 @@
     },
     "./bundler": {
       "import": "./src/main/bundler.js"
+    },
+    "./esbuild-util": {
+      "import": "./src/utils/esbuild-util.js"
+    },
+    "./preact-shim": {
+      "import": "./src/utils/preact-shim.js"
     }
   }
 }

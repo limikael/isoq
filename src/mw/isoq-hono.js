@@ -1,10 +1,15 @@
 import IsoqServer from "../isoq/IsoqServer.js";
+import Browser from "@browser";
+import clientSource from "@clientSource";
 
 export default (conf)=>{
 	if (conf && conf.req)
 		throw new Error("Did you do middleware instead of middleware()");
 
-	let server=new IsoqServer();
+	let server=new IsoqServer({
+		clientSource: clientSource,
+		clientModule: Browser
+	});
 
 	return (async (c, next)=>{
 		async function localFetch(req) {
@@ -14,7 +19,11 @@ export default (conf)=>{
 			return await conf.localFetch(req,c.env,c.executionContext);
 		}
 
-		let response=await server.handleRequest(c.req.raw, localFetch, conf.props);
+		let response=await server.handleRequest(c.req.raw, {
+			localFetch, 
+			props: conf.props
+		});
+
 		if (response)
 			return response;
 

@@ -1,22 +1,33 @@
 import React from "preact/compat";
-import Browser from "@browser";
-import clientSource from "@clientSource";
-import {createElement} from "react";
+import {createElement} from "preact/compat";
 import IsoqSsr from "./IsoqSsr.js";
 import {render as renderToString} from "preact-render-to-string";
 
 export default class IsoqServer {
-	async handleRequest(req, localFetch, props) {
-		if (new URL(req.url).pathname=="/client.js"
-				&& clientSource) {
-			return new Response(clientSource,{
+	constructor({clientModule, clientSource}) {
+		this.clientModule=clientModule;
+		this.clientSource=clientSource;
+	}
+
+	async handleRequest(req, {localFetch, props, clientPathname}) {
+		if (!clientPathname)
+			clientPathname="/client.js";
+
+		if (new URL(req.url).pathname==clientPathname
+				&& this.clientSource) {
+			return new Response(this.clientSource,{
 				headers: {
 					"Content-Type": "text/javascript"
 				}
 			});
 		}
 
-		let ssr=new IsoqSsr(Browser,req,localFetch,props);
+		let ssr=new IsoqSsr(this.clientModule,req,{
+			localFetch,
+			props,
+			clientPathname
+		});
+
 		return await ssr.getResponse();
 	}
 }

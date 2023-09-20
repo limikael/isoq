@@ -1,11 +1,12 @@
 import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
-import {createElement} from "react";
+import {createElement} from "preact/compat";
 
 export default class IsoqSsr {
-	constructor(root, req, localFetch, props) {
+	constructor(root, req, {localFetch, props, clientPathname}) {
 		this.req=req;
 		this.localFetch=localFetch;
+		this.clientPathname=clientPathname;
 		this.promises={};
 		this.data={};
 		this.props=props;
@@ -84,7 +85,7 @@ export default class IsoqSsr {
 					</div>
 					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
 					<script>window.__isoData=${JSON.stringify(this.data)}</script>
-					<script src="/client.js" type="module"></script>
+					<script src="${this.clientPathname}" type="module"></script>
 				</body>
 			</html>
 		`;
