@@ -16,6 +16,10 @@ export default class IsoqClient {
 		return window.location;
 	}
 
+	redirect(url) {
+		window.location=url;
+	}
+
 	fetch=async (url,options={})=>{
 		if (url.startsWith("/"))
 			url=new URL(this.req.url).origin+url;
