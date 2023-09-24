@@ -3,7 +3,7 @@ import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "preact/compat";
 
 export default class IsoqSsr {
-	constructor(root, req, {localFetch, props, clientPathname}) {
+	constructor(root, req, {localFetch, props, clientPathname, setGlobalLocation}) {
 		this.req=req;
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
@@ -11,6 +11,8 @@ export default class IsoqSsr {
 		this.data={};
 		this.deps={};
 		this.props=props;
+		this.setGlobalLocation=setGlobalLocation;
+
 		if (typeof this.props=="function")
 			this.props=this.props(req);
 
@@ -59,7 +61,10 @@ export default class IsoqSsr {
 
 	renderPass() {
 		this.headChildren="";
-		global.location=new URL(this.req.url);
+
+		if (this.setGlobalLocation)
+			global.location=new URL(this.req.url);
+
 		return renderToString(this.element);
 	}
 

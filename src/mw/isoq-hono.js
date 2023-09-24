@@ -2,13 +2,13 @@ import IsoqServer from "../isoq/IsoqServer.js";
 import Browser from "@browser";
 import clientSource from "@clientSource";
 
-export default (conf)=>{
-	if (conf && conf.req)
+export default (conf={})=>{
+	if (conf.req)
 		throw new Error("Did you do middleware instead of middleware()");
 
 	let server=new IsoqServer({
 		clientSource: clientSource,
-		clientModule: Browser
+		clientModule: Browser,
 	});
 
 	return (async (c, next)=>{
@@ -21,7 +21,8 @@ export default (conf)=>{
 
 		let response=await server.handleRequest(c.req.raw, {
 			localFetch, 
-			props: conf.props
+			props: conf.props,
+			setGlobalLocation: conf.setGlobalLocation
 		});
 
 		if (response)
