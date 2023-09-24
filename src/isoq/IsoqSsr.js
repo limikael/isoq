@@ -9,6 +9,7 @@ export default class IsoqSsr {
 		this.clientPathname=clientPathname;
 		this.promises={};
 		this.data={};
+		this.deps={};
 		this.props=props;
 		if (typeof this.props=="function")
 			this.props=this.props(req);
@@ -85,6 +86,7 @@ export default class IsoqSsr {
 					</div>
 					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
 					<script>window.__isoData=${JSON.stringify(this.data)}</script>
+					<script>window.__isoDeps=${JSON.stringify(this.deps)}</script>
 					<script src="${this.clientPathname}" type="module"></script>
 				</body>
 			</html>

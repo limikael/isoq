@@ -2,7 +2,7 @@ import Browser from "@browser";
 import IsoqClient from "./IsoqClient.js";
 import IsoContext from "./IsoContext.js";
 
-let isoClient=new IsoqClient(window.__isoData);
+let isoClient=new IsoqClient(window.__isoData,window.__isoDeps);
 let content=(
 	<IsoContext.Provider value={isoClient}>
 		<Browser {...window.__isoProps}/>

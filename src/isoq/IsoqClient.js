@@ -1,6 +1,7 @@
 export default class IsoqClient {
-	constructor(data) {
+	constructor(data, deps) {
 		this.data=data;
+		this.deps=deps;
 		this.req=new Request(window.location);
 	}
 
@@ -8,8 +9,17 @@ export default class IsoqClient {
 		return false;
 	}
 
+	markIsoDataStale(id) {
+		delete this.data[id];
+		delete this.deps[id];
+	}
+
 	getData(id) {
-		return this.data[id]
+		return this.data[id];
+	}
+
+	getDeps(id) {
+		return this.deps[id];
 	}
 
 	getUrl() {
