@@ -1,4 +1,4 @@
-import {useState, useRef, useMemo} from "react";
+import {useState, useRef, useMemo, useCallback, useLayoutEffect} from "react";
 
 export function useAsyncMemo(fn, deps=[]) {
 	let [val,setVal]=useState();
@@ -34,4 +34,19 @@ export function useAsyncMemo(fn, deps=[]) {
 	},deps);
 
 	return val;
+}
+
+export function useEventListener(o, ev, fn) {
+	useLayoutEffect(()=>{
+		o.addEventListener(ev,fn);
+		return ()=>{
+			o.removeEventListener(ev,fn);
+		}
+	},[o,ev,fn]);
+}
+
+export function useEventUpdate(o, ev) {
+	let [_,setDummyState]=useState();
+	let forceUpdate=useCallback(()=>setDummyState({}));
+	useEventListener(o,ev,forceUpdate);
 }

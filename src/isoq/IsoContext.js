@@ -11,7 +11,7 @@ export function useIsoUrl() {
 	return iso.getUrl();
 }
 
-export function useCompleteNotifier() {
+export function useIsoBarrier() {
 	let iso=useIsoContext();
 	let id=useId();
 	return iso.getCompleteNotifier(id);

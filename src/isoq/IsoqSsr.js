@@ -1,6 +1,7 @@
 import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "preact/compat";
+import {RouterProvider} from "../components/router.js";
 
 export default class IsoqSsr {
 	constructor(root, req, {localFetch, props, clientPathname, setGlobalLocation}) {
@@ -23,7 +24,11 @@ export default class IsoqSsr {
 		this.element=createElement(
 			IsoContext.Provider,
 			{value: this},
-			createElement(root,this.props)
+			createElement(
+				RouterProvider,
+				{url: req.url},
+				createElement(root,this.props)
+			)
 		);
 	}
 
