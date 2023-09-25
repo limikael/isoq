@@ -17,6 +17,8 @@ class Router extends EventTarget {
 
 		if (url) {
 			this.url=url;
+			console.log("isoref current: "+this.isoRef.current);
+
 			if (!this.isoRef.current)
 				this.enqueuedUrl=url;
 		}
@@ -124,10 +126,12 @@ export function Link({children, ...props}) {
 export function Route({path, loader, children, notFound}) {
 	let router=useRouter();
 	useEventUpdate(router,"childrender");
-	//console.log("render: "+path+", current: "+router.getCurrentUrl()+", queue: "+router.getEnqueuedUrl());
+	console.log("render: "+path+", current: "+router.getCurrentUrl()+", queue: "+router.getEnqueuedUrl());
 
-	if (urlMatchPath(router.getEnqueuedUrl(),path))
+	if (urlMatchPath(router.getEnqueuedUrl(),path)) {
+		console.log("committing: "+path);
 		router.commitEnqueuedUrl(loader);
+	}
 
 	if (urlMatchPath(router.getCurrentUrl(),path))
 		return createElement(Fragment,{},children);
