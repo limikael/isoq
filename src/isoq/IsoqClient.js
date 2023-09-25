@@ -1,8 +1,13 @@
 export default class IsoqClient {
-	constructor(data, deps) {
+	constructor(data, deps, refs) {
 		this.data=data;
 		this.deps=deps;
+		this.refs=refs;
 		this.req=new Request(window.location);
+	}
+
+	getIsoRef(id) {
+		return this.refs[id];
 	}
 
 	isSsr() {
@@ -35,5 +40,9 @@ export default class IsoqClient {
 			url=new URL(this.req.url).origin+url;
 
 		return await fetch(url,options);
+	}
+
+	getCompleteNotifier(id) {
+		return ()=>{};
 	}
 }

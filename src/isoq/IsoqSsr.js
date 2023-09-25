@@ -8,10 +8,14 @@ export default class IsoqSsr {
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
 		this.promises={};
+		this.completeNotifiers={};
+		this.completePromises={};
+		this.completedPromises={};
 		this.data={};
 		this.deps={};
 		this.props=props;
 		this.setGlobalLocation=setGlobalLocation;
+		this.refs={};
 
 		if (typeof this.props=="function")
 			this.props=this.props(req);
@@ -21,6 +25,31 @@ export default class IsoqSsr {
 			{value: this},
 			createElement(root,this.props)
 		);
+	}
+
+	getIsoRef=(id, initial)=>{
+		if (!this.refs[id])
+			this.refs[id]={
+				current: initial
+			};
+
+		return this.refs[id];
+	}
+
+	getCompleteNotifier=(id)=>{
+		if (!this.completeNotifiers[id]) {
+			let resolver;
+			this.completePromises[id]=new Promise(resolve=>{
+				resolver=resolve;
+			});
+
+			this.completeNotifiers[id]=()=>{
+				this.completedPromises[id]=this.completePromises[id];
+				resolver();
+			};
+		}
+
+		return this.completeNotifiers[id];
 	}
 
 	redirect(targetUrl) {
@@ -53,19 +82,42 @@ export default class IsoqSsr {
 	async wait() {
 		for (let id in this.promises)
 			this.data[id]=await this.promises[id];
+
+		for (let id in this.completePromises)
+			await this.completePromises[id];
 	}
 
 	hasPromises() {
-		return (Object.keys(this.promises).length>Object.keys(this.data).length);
+		if (Object.keys(this.promises).length>
+				Object.keys(this.data).length)
+			return true;
+
+		if (Object.keys(this.completePromises).length>
+				Object.keys(this.completedPromises).length)
+			return true;
+
+		return false;
+	}
+
+	registerEffect(fn) {
+		this.effects.push(fn);
 	}
 
 	renderPass() {
 		this.headChildren="";
+		this.effects=[];
 
 		if (this.setGlobalLocation)
 			global.location=new URL(this.req.url);
 
-		return renderToString(this.element);
+		let result=renderToString(this.element);
+		for (let effect of this.effects) {
+			let cleanup=effect();
+			if (cleanup)
+				cleanup();
+		}
+
+		return result;
 	}
 
 	async render() {
@@ -92,6 +144,7 @@ export default class IsoqSsr {
 					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
 					<script>window.__isoData=${JSON.stringify(this.data)}</script>
 					<script>window.__isoDeps=${JSON.stringify(this.deps)}</script>
+					<script>window.__isoRefs=${JSON.stringify(this.refs)}</script>
 					<script src="${this.clientPathname}" type="module"></script>
 				</body>
 			</html>
