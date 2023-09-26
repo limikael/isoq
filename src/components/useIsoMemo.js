@@ -1,14 +1,17 @@
-import {useId, useContext} from "react";
+import {useContext} from "react";
 import {useIsoContext} from "../isoq/IsoContext.js";
 import {useAsyncMemo} from "../utils/react-util.js";
 import {jsonEq} from "../utils/js-util.js";
+import {useIsoId} from "./useIsoId.js";
 
 export function useIsoMemo(fn, deps=[]) {
-	let id=useId();
+	let id=useIsoId();
 	let iso=useIsoContext();
 
 	// Server
 	if (iso.isSsr()) {
+		//console.log("id: "+id+" fn: "+fn);
+
 		if (!iso.promises[id]) {
 			iso.promises[id]=fn();
 			iso.deps[id]=deps;

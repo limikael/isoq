@@ -1,4 +1,3 @@
-import {useId} from "react";
 import {useIsoContext} from "../isoq/IsoContext.js";
 
 export function Head({children}) {

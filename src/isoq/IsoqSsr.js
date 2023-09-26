@@ -2,6 +2,7 @@ import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "preact/compat";
 import {RouterProvider} from "../components/router.js";
+import {IsoIdNamespace} from "../components/useIsoId.js";
 
 class Barrier {
 	constructor(id) {
@@ -52,9 +53,13 @@ export default class IsoqSsr {
 			IsoContext.Provider,
 			{value: this},
 			createElement(
-				RouterProvider,
-				{url: req.url},
-				createElement(root,this.props)
+				IsoIdNamespace,
+				{name: "root"},
+				createElement(
+					RouterProvider,
+					{url: req.url},
+					createElement(root,this.props)
+				)
 			)
 		);
 	}

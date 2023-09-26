@@ -3,6 +3,7 @@ import {splitPath, jsonEq, urlMatchPath} from "../utils/js-util.js";
 import {useEventUpdate} from "../utils/react-util.js";
 import {useIsoRef, useIsoEffect, useIsoBarrier, useServerRef, useIsoContext} from "isoq";
 import {createElement, Fragment} from "react";
+import {IsoIdNamespace} from "./useIsoId.js";
 
 class Router extends EventTarget {
 	constructor({iso, url, barrier, loaderDataRef}) {
@@ -13,14 +14,8 @@ class Router extends EventTarget {
 		this.loaderDataRef=loaderDataRef;
 		this.loadingState=false;
 
-		if (url) {
-			this.url=url;
+		if (this.iso.isSsr())
 			this.enqueuedUrl=url;
-		}
-	}
-
-	isSsr() {
-		return !!this.url;
 	}
 
 	enqueueUrl(url) {
@@ -29,8 +24,8 @@ class Router extends EventTarget {
 	}
 
 	getCurrentUrl() {
-		if (this.isSsr())
-			return this.url;
+		if (this.iso.isSsr())
+			return this.ssrUrl;
 
 		return window.location;
 	}
@@ -55,8 +50,15 @@ class Router extends EventTarget {
 			this.dispatchEvent(new Event("loadingStateChange"));
 		}
 
-		if (!this.isSsr())
+		if (this.iso.isSsr())
+			this.ssrUrl=newUrl;
+
+		else {
 			history.pushState(null,null,newUrl);
+			setTimeout(()=>{
+				window.scrollTo(0,0);
+			},0);
+		}
 
 		this.dispatchEvent(new Event("change"));
 		this.barrier();
@@ -139,5 +141,5 @@ export function Route({path, loader, children, notFound}) {
 	}
 
 	if (urlMatchPath(router.getCurrentUrl(),path))
-		return createElement(Fragment,{},children);
+		return createElement(IsoIdNamespace,{name: "route"},children);
 }
