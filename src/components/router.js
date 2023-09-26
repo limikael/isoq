@@ -1,26 +1,21 @@
 import {createContext, useRef, useContext, useState, useCallback, useEffect, useLayoutEffect} from "react";
 import {splitPath, jsonEq, urlMatchPath} from "../utils/js-util.js";
 import {useEventUpdate} from "../utils/react-util.js";
-import {useIsoRef, useIsoEffect, useIsoBarrier} from "isoq";
+import {useIsoRef, useIsoEffect, useIsoBarrier, useServerRef, useIsoContext} from "isoq";
 import {createElement, Fragment} from "react";
 
 class Router extends EventTarget {
-	constructor({url, onrender, isoRef, loaderDataRef}) {
+	constructor({iso, url, barrier, loaderDataRef}) {
 		super();
 
-		//console.log("constructing router, isoref="+isoRef.current);
-
-		this.onrender=onrender;
-		this.isoRef=isoRef;
+		this.iso=iso;
+		this.barrier=barrier;
 		this.loaderDataRef=loaderDataRef;
 		this.loadingState=false;
 
 		if (url) {
 			this.url=url;
-			console.log("isoref current: "+this.isoRef.current);
-
-			if (!this.isoRef.current)
-				this.enqueuedUrl=url;
+			this.enqueuedUrl=url;
 		}
 	}
 
@@ -45,6 +40,10 @@ class Router extends EventTarget {
 	}
 
 	async commitEnqueuedUrl(loader) {
+		//console.log("***** commit: "+this.enqueuedUrl);
+
+		this.iso.unresolveBarrier(this.barrier);
+
 		let newUrl=this.enqueuedUrl;
 		this.enqueuedUrl=undefined;
 
@@ -59,11 +58,8 @@ class Router extends EventTarget {
 		if (!this.isSsr())
 			history.pushState(null,null,newUrl);
 
-		this.isoRef.current=true;
 		this.dispatchEvent(new Event("change"));
-
-		if (this.onrender)
-			this.onrender();
+		this.barrier();
 	}
 }
 
@@ -85,19 +81,28 @@ export function useIsLoading() {
 }
 
 export function RouterProvider({url, children}) {
-	let onrender=useIsoBarrier();
-	let isoRef=useIsoRef();
+	let barrier=useIsoBarrier();
 	let loaderDataRef=useIsoRef();
-	let ref=useRef();
-	if (!ref.current)
-		ref.current=new Router({url, onrender, isoRef, loaderDataRef});
+	let iso=useIsoContext();
+	let ref=useServerRef();
+	if (!ref.current) {
+		//console.log("*** constructing router for: "+url);
+		ref.current=new Router({iso, url, barrier, loaderDataRef});
+	}
 
 	let router=ref.current;
 
 	useEventUpdate(router,"change");
 	useIsoEffect(()=>{
-		if (router.getEnqueuedUrl())
-			router.commitEnqueuedUrl();
+		if (router.getEnqueuedUrl()) {
+			if (iso.isSsr()) {
+				router.barrier();
+			}
+
+			else {
+				router.commitEnqueuedUrl();
+			}
+		}
 	});
 
 	router.dispatchEvent(new Event("childrender"));
@@ -126,10 +131,10 @@ export function Link({children, ...props}) {
 export function Route({path, loader, children, notFound}) {
 	let router=useRouter();
 	useEventUpdate(router,"childrender");
-	console.log("render: "+path+", current: "+router.getCurrentUrl()+", queue: "+router.getEnqueuedUrl());
+	//console.log("render: "+path+", current: "+router.getCurrentUrl()+", queue: "+router.getEnqueuedUrl());
 
 	if (urlMatchPath(router.getEnqueuedUrl(),path)) {
-		console.log("committing: "+path);
+		//console.log("committing: "+path);
 		router.commitEnqueuedUrl(loader);
 	}
 

@@ -3,20 +3,47 @@ import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "preact/compat";
 import {RouterProvider} from "../components/router.js";
 
+class Barrier {
+	constructor(id) {
+		this.resolved=false;
+		this.promise=new Promise(resolve=>{
+			this.promiseResolver=resolve
+		});
+
+		this.id=id;
+		this.resolve.barrierId=id;
+	}
+
+	resolve=()=>{
+		this.resolved=true;
+		this.promiseResolver();
+	}
+
+	unresolve() {
+		this.resolved=false;
+		this.promise=new Promise(resolve=>{
+			this.promiseResolver=resolve
+		});
+	}
+
+	isResolved() {
+		return this.resolved;
+	}
+}
+
 export default class IsoqSsr {
 	constructor(root, req, {localFetch, props, clientPathname, setGlobalLocation}) {
 		this.req=req;
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
 		this.promises={};
-		this.completeNotifiers={};
-		this.completePromises={};
-		this.completedPromises={};
 		this.data={};
 		this.deps={};
+		this.barriers={};
 		this.props=props;
 		this.setGlobalLocation=setGlobalLocation;
 		this.refs={};
+		this.serverRefs={};
 
 		if (typeof this.props=="function")
 			this.props=this.props(req);
@@ -32,6 +59,16 @@ export default class IsoqSsr {
 		);
 	}
 
+	getServerRef=(id, initial)=>{
+		if (!this.serverRefs[id]) {
+			this.serverRefs[id]={
+				current: initial
+			}
+		}
+
+		return this.serverRefs[id];
+	}
+
 	getIsoRef=(id, initial)=>{
 		if (!this.refs[id])
 			this.refs[id]={
@@ -41,20 +78,22 @@ export default class IsoqSsr {
 		return this.refs[id];
 	}
 
-	getCompleteNotifier=(id)=>{
-		if (!this.completeNotifiers[id]) {
-			let resolver;
-			this.completePromises[id]=new Promise(resolve=>{
-				resolver=resolve;
-			});
+	getBarrier=(id)=>{
+		if (!this.barriers[id])
+			this.barriers[id]=new Barrier(id);
 
-			this.completeNotifiers[id]=()=>{
-				this.completedPromises[id]=this.completePromises[id];
-				resolver();
-			};
-		}
+		return this.barriers[id].resolve;
+	}
 
-		return this.completeNotifiers[id];
+	unresolveBarrier(barrierResolver) {
+		if (!barrierResolver.barrierId)
+			throw new Error("Not a barrier");
+
+		let id=barrierResolver.barrierId;
+		let barrier=this.barriers[id];
+
+		//console.log("unresolving: "+barrier.id);
+		barrier.unresolve();
 	}
 
 	redirect(targetUrl) {
@@ -85,11 +124,16 @@ export default class IsoqSsr {
 	}
 
 	async wait() {
+		//console.log("waiting...");
 		for (let id in this.promises)
 			this.data[id]=await this.promises[id];
 
-		for (let id in this.completePromises)
-			await this.completePromises[id];
+		for (let id in this.barriers) {
+			//console.log("waiting for completion: "+id);
+			await this.barriers[id].promise;
+		}
+
+		//console.log("done waiting...");
 	}
 
 	hasPromises() {
@@ -97,9 +141,9 @@ export default class IsoqSsr {
 				Object.keys(this.data).length)
 			return true;
 
-		if (Object.keys(this.completePromises).length>
-				Object.keys(this.completedPromises).length)
-			return true;
+		for (let id in this.barriers)
+			if (!this.barriers[id].isResolved())
+				return true;
 
 		return false;
 	}
@@ -111,7 +155,6 @@ export default class IsoqSsr {
 	renderPass() {
 		this.headChildren="";
 		this.effects=[];
-
 		if (this.setGlobalLocation)
 			global.location=new URL(this.req.url);
 

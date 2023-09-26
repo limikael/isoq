@@ -42,7 +42,10 @@ export default class IsoqClient {
 		return await fetch(url,options);
 	}
 
-	getCompleteNotifier(id) {
+	getBarrier(id) {
 		return ()=>{};
+	}
+
+	unresolveBarrier() {
 	}
 }
