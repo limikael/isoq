@@ -16,6 +16,14 @@ class Router extends EventTarget {
 
 		if (this.iso.isSsr())
 			this.enqueuedUrl=url;
+
+		if (!this.iso.isSsr()) {
+			window.addEventListener("popstate",()=>{
+				//this.enqueueUrl(window.location);
+				window.location=window.location;
+				//console.log("popstate..."+window.location);
+			});
+		}
 	}
 
 	enqueueUrl(url) {
@@ -45,6 +53,7 @@ class Router extends EventTarget {
 		if (loader) {
 			this.loadingState=true;
 			this.dispatchEvent(new Event("loadingStateChange"));
+			//await new Promise(resolve=>setTimeout(resolve,1000));
 			this.loaderDataRef.current=await loader(newUrl);
 			this.loadingState=false;
 			this.dispatchEvent(new Event("loadingStateChange"));
@@ -119,13 +128,16 @@ export function Link({children, ...props}) {
 	let router=useRouter();
 
 	function onLinkClick(ev) {
+		if (props.onclick)
+			props.onclick(ev);
+
 		ev.preventDefault();
 		router.enqueueUrl(props.href);
 	}
 
 	return createElement(
 		"a",
-		{onclick: onLinkClick, ...props},
+		{...props, onclick: onLinkClick},
 		children
 	);
 }
