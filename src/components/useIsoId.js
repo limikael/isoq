@@ -26,7 +26,8 @@ export function useIsoId() {
 	let val;
 	if (!iso.isSsr()) {
 		let ref=useRef();
-		if (!ref.current)
+		//console.log(ref);
+		if (ref.current===undefined)
 			ref.current=context.count++;
 
 		val=ref.current;

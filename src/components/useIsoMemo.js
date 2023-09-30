@@ -3,9 +3,11 @@ import {useIsoContext} from "../isoq/IsoContext.js";
 import {useAsyncMemo} from "../utils/react-util.js";
 import {jsonEq} from "../utils/js-util.js";
 import {useIsoId} from "./useIsoId.js";
+import {useId} from "react";
 
 export function useIsoMemo(fn, deps=[]) {
 	let id=useIsoId();
+	//let id=useId();
 	let iso=useIsoContext();
 
 	// Server
@@ -22,11 +24,14 @@ export function useIsoMemo(fn, deps=[]) {
 
 	// Client
 	else {
+		//console.log("iso id: "+id);
+
 		let v=useAsyncMemo(async()=>{
 			if (iso.getData(id)!==undefined && jsonEq(deps,iso.getDeps(id)))
 				return;
 
 			iso.markIsoDataStale(id);
+
 			return await fn();
 		},deps);
 

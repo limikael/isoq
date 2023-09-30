@@ -4,10 +4,17 @@ export function useAsyncMemo(fn, deps=[]) {
 	let [val,setVal]=useState();
 	let queueRef=useRef();
 	let runningRef=useRef(false);
+	let runningDeps=useRef();
+
+	//console.log("use async, deps="+deps);
 
 	useMemo(async ()=>{
 		if (runningRef.current) {
-			queueRef.current=fn;
+			if (JSON.stringify(deps)!=runningDeps.current) {
+				//console.log("enqueue, deps=",deps);
+				queueRef.current=fn;
+			}
+
 			return;
 		}
 
@@ -16,8 +23,10 @@ export function useAsyncMemo(fn, deps=[]) {
 			let f=queueRef.current;
 			queueRef.current=null;
 			runningRef.current=true;
+			runningDeps.current=JSON.stringify(deps);
 			try {
 				setVal(undefined);
+				//console.log("running async memo, deps=",deps);
 				let res=await f();
 				if (!queueRef.current)
 					setVal(res);
@@ -30,6 +39,7 @@ export function useAsyncMemo(fn, deps=[]) {
 			}
 
 			runningRef.current=false;
+			runningDeps.current=null;
 		}
 	},deps);
 
