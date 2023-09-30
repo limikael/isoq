@@ -3,31 +3,35 @@ import {useState, useRef, useMemo, useCallback, useLayoutEffect} from "react";
 export function useAsyncMemo(fn, deps=[]) {
 	let [val,setVal]=useState();
 	let queueRef=useRef();
-	let runningRef=useRef(false);
-	let runningDeps=useRef();
+	let runningRef=useRef();
 
 	//console.log("use async, deps="+deps);
 
 	useMemo(async ()=>{
 		if (runningRef.current) {
-			if (JSON.stringify(deps)!=runningDeps.current) {
-				//console.log("enqueue, deps=",deps);
-				queueRef.current=fn;
+			if (JSON.stringify(deps)!=runningDeps.current.deps) {
+				queueRef.current={
+					deps: JSON.stringify(deps),
+					fn: fn
+				}
 			}
 
 			return;
 		}
 
-		queueRef.current=fn;
+		queueRef.current={
+			deps: JSON.stringify(deps),
+			fn: fn
+		};
+
 		while (queueRef.current) {
-			let f=queueRef.current;
+			runningRef.current=queueRef.current;
 			queueRef.current=null;
-			runningRef.current=true;
-			runningDeps.current=JSON.stringify(deps);
+
 			try {
 				setVal(undefined);
 				//console.log("running async memo, deps=",deps);
-				let res=await f();
+				let res=await runningRef.current.fn();
 				if (!queueRef.current)
 					setVal(res);
 			}
@@ -38,8 +42,7 @@ export function useAsyncMemo(fn, deps=[]) {
 					setVal(e);
 			}
 
-			runningRef.current=false;
-			runningDeps.current=null;
+			runningRef.current=null;
 		}
 	},deps);
 
