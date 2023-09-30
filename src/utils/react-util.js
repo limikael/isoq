@@ -9,7 +9,7 @@ export function useAsyncMemo(fn, deps=[]) {
 
 	useMemo(async ()=>{
 		if (runningRef.current) {
-			if (JSON.stringify(deps)!=runningDeps.current.deps) {
+			if (JSON.stringify(deps)!=runningRef.current.deps) {
 				queueRef.current={
 					deps: JSON.stringify(deps),
 					fn: fn
