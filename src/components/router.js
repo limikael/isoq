@@ -82,6 +82,8 @@ export function useRouter() {
 
 export function useLoaderData() {
 	let router=useRouter();
+	useEventUpdate(router,"change");
+
 	return router.loaderDataRef.current;
 }
 
