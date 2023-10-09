@@ -134,7 +134,9 @@ export function Link({children, ...props}) {
 			props.onclick(ev);
 
 		ev.preventDefault();
-		router.enqueueUrl(props.href);
+
+		if (props.href)
+			router.enqueueUrl(props.href);
 	}
 
 	return createElement(
