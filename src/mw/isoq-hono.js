@@ -26,14 +26,24 @@ export default (conf={})=>{
 			return await conf.localFetch(req,c.env,c.executionContext);
 		}
 
-		let response=await server.handleRequest(c.req.raw, {
-			localFetch, 
-			props: conf.props,
-			setGlobalLocation: conf.setGlobalLocation
-		});
+		try {
+			let response=await server.handleRequest(c.req.raw, {
+				localFetch, 
+				props: conf.props,
+				setGlobalLocation: conf.setGlobalLocation
+			});
 
-		if (response)
-			return response;
+			if (response)
+				return response;
+		}
+
+		catch (e) {
+			console.log(e);
+
+			return new Response(e.stack,{
+				status: 500
+			});
+		}
 
 		return await next();
 	});
