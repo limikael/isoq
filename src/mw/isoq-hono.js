@@ -16,6 +16,13 @@ export default (conf={})=>{
 			if (!conf.localFetch)
 				throw new Error("Local fetch doesn't work, you need to pass the app!");
 
+			if (c.req.raw.headers.get("cookie"))
+				req.headers.set("cookie",c.req.raw.headers.get("cookie"));
+
+			//console.log("local fetch: "+req.url);
+			//console.log("local fetch headers: ",req.headers);
+			//console.log("original headers:: ",c.req.raw.headers);
+
 			return await conf.localFetch(req,c.env,c.executionContext);
 		}
 
