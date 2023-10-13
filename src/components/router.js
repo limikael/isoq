@@ -80,6 +80,13 @@ export function useRouter() {
 	return useContext(RouterContext);
 }
 
+export function useRouterUrl() {
+	let router=useRouter();
+	useEventUpdate(router,"change");
+
+	return router.getCurrentUrl();
+}
+
 export function useLoaderData() {
 	let router=useRouter();
 	useEventUpdate(router,"change");

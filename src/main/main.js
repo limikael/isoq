@@ -6,4 +6,4 @@ export {useServerRef} from "../components/useServerRef.js";
 export {useIsoBarrier} from "../components/useIsoBarrier.js";
 export {useIsoContext, useIsoUrl} from "../isoq/IsoContext.js";
 export {useIsoId, IsoIdNamespace} from "../components/useIsoId.js";
-export {Link, Route, useLoaderData, useIsLoading} from "../components/router.js";
+export {Link, Route, useLoaderData, useIsLoading, useRouterUrl} from "../components/router.js";
