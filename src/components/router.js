@@ -18,10 +18,17 @@ class Router extends EventTarget {
 			this.enqueuedUrl=url;
 
 		if (!this.iso.isSsr()) {
-			window.addEventListener("popstate",()=>{
-				//this.enqueueUrl(window.location);
-				window.location=window.location;
-				//console.log("popstate..."+window.location);
+			window.addEventListener("popstate",(e)=>{
+				//console.log("popstate: popping=",window.__popping);
+
+				if (!window.__poppingState) {
+					window.__poppingState=true;
+					//this.enqueueUrl(window.location);
+					window.location=window.location;
+					//console.log("popstate..."+window.location);
+				}
+
+				window.__poppingState=false;
 			});
 		}
 	}
