@@ -2,44 +2,44 @@ import {useContext} from "react";
 import {useIsoContext} from "../isoq/IsoContext.js";
 import {useAsyncMemo} from "../utils/react-util.js";
 import {jsonEq} from "../utils/js-util.js";
-import {useIsoId} from "./useIsoId.js";
-import {useId} from "react";
+import {useIsoRef} from "./useIsoRef.js";
+import {useIsoBarrier} from "./useIsoBarrier.js";
 
 export function useIsoMemo(fn, deps=[]) {
-	let id=useIsoId();
-	//let id=useId();
 	let iso=useIsoContext();
+	let ref=useIsoRef();
+	let barrier=useIsoBarrier();
 
 	// Server
 	if (iso.isSsr()) {
-		//console.log("id: "+id+" fn: "+fn);
+		if (ref.current)
+			return ref.current.data;
 
-		if (!iso.promises[id]) {
-			iso.promises[id]=fn();
-			iso.deps[id]=deps;
-		}
-
-		return iso.data[id];
+		(async()=>{
+			ref.current={deps: deps};
+			ref.current.data=await fn();
+			barrier();
+		})();
 	}
 
 	// Client
 	else {
-		//console.log("iso id: "+id);
-
-		let v=useAsyncMemo(async()=>{
-			if (iso.getData(id)!==undefined && jsonEq(deps,iso.getDeps(id)))
+		useAsyncMemo(async()=>{
+			if (ref.current && jsonEq(ref.current.deps,deps))
 				return;
 
-			iso.markIsoDataStale(id);
+			ref.current=null;
+			let data=await fn();
+			ref.current={
+				deps: deps,
+				data: data
+			};
 
-			return await fn();
+			return {};
 		},deps);
 
-		if (v!==undefined)
-			return v;
-
-		if (iso.getData(id)!==undefined && jsonEq(deps,iso.getDeps(id)))
-			return iso.getData(id);
+		if (ref.current && jsonEq(ref.current.deps,deps))
+			return ref.current.data;
 	}
 }
 
