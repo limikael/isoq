@@ -37,13 +37,10 @@ export default class IsoqSsr {
 		this.req=req;
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
-		this.promises={};
-		this.data={};
-		this.deps={};
+		this.refs={};
 		this.barriers={};
 		this.props=props;
 		this.setGlobalLocation=setGlobalLocation;
-		this.refs={};
 		this.serverRefs={};
 
 		if (typeof this.props=="function")
@@ -129,10 +126,6 @@ export default class IsoqSsr {
 	}
 
 	async wait() {
-		//console.log("waiting...");
-		for (let id in this.promises)
-			this.data[id]=await this.promises[id];
-
 		for (let id in this.barriers) {
 			//console.log("waiting for completion: "+id);
 			await this.barriers[id].promise;
@@ -142,10 +135,6 @@ export default class IsoqSsr {
 	}
 
 	hasPromises() {
-		if (Object.keys(this.promises).length>
-				Object.keys(this.data).length)
-			return true;
-
 		for (let id in this.barriers)
 			if (!this.barriers[id].isResolved())
 				return true;
@@ -195,8 +184,6 @@ export default class IsoqSsr {
 						${renderResult}
 					</div>
 					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
-					<script>window.__isoData=${JSON.stringify(this.data)}</script>
-					<script>window.__isoDeps=${JSON.stringify(this.deps)}</script>
 					<script>window.__isoRefs=${JSON.stringify(this.refs)}</script>
 					<script src="${this.clientPathname}" type="module"></script>
 				</body>

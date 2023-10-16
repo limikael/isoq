@@ -5,7 +5,7 @@ import {useIsoId} from "./useIsoId.js";
 export function useIsoRef(initial) {
 	let id=useIsoId();
 	let iso=useIsoContext();
-	let spare=useRef(initial);
+	let actualRef=useRef(initial);
 
 	if (iso.isSsr()) {
 		return iso.getIsoRef(id,initial);
@@ -13,9 +13,11 @@ export function useIsoRef(initial) {
 
 	else {
 		let cand=iso.getIsoRef(id);
-		if (cand)
-			return cand;
+		if (cand) {
+			actualRef.current=cand.current;
+			iso.markIsoRefStale(id);
+		}
 
-		return spare;
+		return actualRef;
 	}
 }

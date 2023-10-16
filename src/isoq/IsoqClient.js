@@ -1,7 +1,5 @@
 export default class IsoqClient {
-	constructor(data, deps, refs) {
-		this.data=data;
-		this.deps=deps;
+	constructor(refs) {
 		this.refs=refs;
 		this.req=new Request(window.location);
 	}
@@ -10,21 +8,12 @@ export default class IsoqClient {
 		return this.refs[id];
 	}
 
+	markIsoRefStale(id) {
+		delete this.refs[id];
+	}
+
 	isSsr() {
 		return false;
-	}
-
-	markIsoDataStale(id) {
-		delete this.data[id];
-		delete this.deps[id];
-	}
-
-	getData(id) {
-		return this.data[id];
-	}
-
-	getDeps(id) {
-		return this.deps[id];
 	}
 
 	getUrl() {
