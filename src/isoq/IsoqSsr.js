@@ -171,6 +171,11 @@ export default class IsoqSsr {
 
 		let head=renderToString(this.headChildren);
 
+		for (let k of Object.keys(this.refs)) {
+			if (this.refs[k].local)
+				delete this.refs[k];
+		}
+
 		return `
 			<!DOCTYPE html>
 			<html>

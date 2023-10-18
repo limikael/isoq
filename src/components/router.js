@@ -1,143 +1,92 @@
-import {createContext, useRef, useContext, useState, useCallback, useEffect, useLayoutEffect} from "react";
-import {splitPath, jsonEq, urlMatchPath} from "../utils/js-util.js";
+import {createContext, useContext} from "react";
+import {urlMatchPath} from "../utils/js-util.js";
+import {useIsoRef, useIsoContext, useIsoMemo, useIsoBarrier} from "isoq";
 import {useEventUpdate} from "../utils/react-util.js";
-import {useIsoRef, useIsoEffect, useIsoBarrier, useServerRef, useIsoContext} from "isoq";
 import {createElement, Fragment} from "react";
 import {IsoIdNamespace} from "./useIsoId.js";
 
 class Router extends EventTarget {
-	constructor({iso, url, barrier, loaderDataRef}) {
+	constructor(isoContext, loaderDataRef) {
 		super();
+		this.initialUrl=isoContext.getUrl();
 
-		this.iso=iso;
-		this.barrier=barrier;
+		if (!isoContext.isSsr())
+			this.currentUrl=isoContext.getUrl();
+
+		this.pendingUrl=isoContext.getUrl();
 		this.loaderDataRef=loaderDataRef;
-		this.loadingState=false;
 
-		if (this.iso.isSsr())
-			this.enqueuedUrl=url;
-
-		if (!this.iso.isSsr()) {
+		if (!isoContext.isSsr()) {
 			window.addEventListener("popstate",(e)=>{
-				//console.log("popstate: popping=",window.__popping);
-
-				if (!window.__poppingState) {
-					window.__poppingState=true;
-					//this.enqueueUrl(window.location);
-					window.location=window.location;
-					//console.log("popstate..."+window.location);
-				}
-
-				window.__poppingState=false;
+				this.setPendingUrl(window.location);
 			});
 		}
+
 	}
 
-	enqueueUrl(url) {
-		this.enqueuedUrl=new URL(url,this.getCurrentUrl()).toString();
-		this.dispatchEvent(new Event("change"));
+	getInitialUrl() {
+		return this.initialUrl;
 	}
 
 	getCurrentUrl() {
-		if (this.iso.isSsr())
-			return this.ssrUrl;
-
-		return window.location;
+		return this.currentUrl;
 	}
 
-	getEnqueuedUrl() {
-		return this.enqueuedUrl;
+	getPendingUrl() {
+		return this.pendingUrl;
 	}
 
-	async commitEnqueuedUrl(loader) {
-		//console.log("***** commit: "+this.enqueuedUrl);
+	getLoaderData() {
+		return this.loaderDataRef.current;
+	}
 
-		this.iso.unresolveBarrier(this.barrier);
-
-		let newUrl=this.enqueuedUrl;
-		this.enqueuedUrl=undefined;
-
-		if (loader) {
-			this.loadingState=true;
-			this.dispatchEvent(new Event("loadingStateChange"));
-			//await new Promise(resolve=>setTimeout(resolve,1000));
-			this.loaderDataRef.current=await loader(newUrl);
-			this.loadingState=false;
-			this.dispatchEvent(new Event("loadingStateChange"));
-		}
-
-		if (this.iso.isSsr())
-			this.ssrUrl=newUrl;
-
-		else {
-			history.pushState(null,null,newUrl);
-			setTimeout(()=>{
-				window.scrollTo(0,0);
-			},0);
-		}
-
+	setCurrentUrl(url) {
+		this.currentUrl=new URL(url,this.initialUrl).toString();
 		this.dispatchEvent(new Event("change"));
-		this.barrier();
+	}
+
+	setPendingUrl(url) {
+		this.pendingUrl=new URL(url,this.initialUrl).toString();
+		this.dispatchEvent(new Event("change"));
+	}
+
+	setLoaderData(loaderData) {
+		//console.log("set loader data: "+loaderData);
+		this.loaderDataRef.current=loaderData;
+		this.dispatchEvent(new Event("change"));
+	}
+
+	resolveUrl(url) {
+		return new URL(url,this.initialUrl).toString();
 	}
 }
 
 let RouterContext=createContext();
 
-export function useRouter() {
-	return useContext(RouterContext);
-}
-
-export function useRouterUrl() {
-	let router=useRouter();
-	useEventUpdate(router,"change");
-
-	return router.getCurrentUrl();
-}
-
-export function useLoaderData() {
-	let router=useRouter();
-	useEventUpdate(router,"change");
-
-	return router.loaderDataRef.current;
-}
-
-export function useIsLoading() {
-	let router=useRouter();
-	useEventUpdate(router,"loadingStateChange");
-	return router.loadingState;
-}
-
 export function RouterProvider({url, children}) {
-	let barrier=useIsoBarrier();
-	let loaderDataRef=useIsoRef();
 	let iso=useIsoContext();
-	let ref=useServerRef();
-	if (!ref.current) {
-		//console.log("*** constructing router for: "+url);
-		ref.current=new Router({iso, url, barrier, loaderDataRef});
-	}
+	let ref=useIsoRef(null,true);
+	let loaderDataRef=useIsoRef();
+	if (!ref.current)
+		ref.current=new Router(iso,loaderDataRef);
 
-	let router=ref.current;
+	useEventUpdate(ref.current,"change");
 
-	useEventUpdate(router,"change");
-	useIsoEffect(()=>{
-		if (router.getEnqueuedUrl()) {
-			if (iso.isSsr()) {
-				router.barrier();
-			}
-
-			else {
-				router.commitEnqueuedUrl();
-			}
-		}
-	});
-
-	router.dispatchEvent(new Event("childrender"));
 	return createElement(
 		RouterContext.Provider,
 		{value: ref.current},
 		children
 	);
+}
+
+export function useRouter() {
+	return useContext(RouterContext);
+}
+
+export function useIsLoading() {
+	let router=useRouter();
+	useEventUpdate(router,"change");
+	return (router.getCurrentUrl()!=router.getPendingUrl());
 }
 
 export function Link({children, ...props}) {
@@ -149,8 +98,15 @@ export function Link({children, ...props}) {
 
 		ev.preventDefault();
 
-		if (props.href)
-			router.enqueueUrl(props.href);
+		if (props.href) {
+			if (router.resolveUrl(props.href)==router.getCurrentUrl() &&
+					router.resolveUrl(props.href)==router.getPendingUrl()) {
+				window.scrollTo(0,0);
+			}
+
+			else
+				router.setPendingUrl(props.href);
+		}
 	}
 
 	return createElement(
@@ -160,16 +116,67 @@ export function Link({children, ...props}) {
 	);
 }
 
-export function Route({path, loader, children, notFound}) {
+export function useRouterUrl() {
 	let router=useRouter();
-	useEventUpdate(router,"childrender");
-	//console.log("render: "+path+", current: "+router.getCurrentUrl()+", queue: "+router.getEnqueuedUrl());
+	useEventUpdate(router,"change");
 
-	if (urlMatchPath(router.getEnqueuedUrl(),path)) {
-		//console.log("committing: "+path);
-		router.commitEnqueuedUrl(loader);
-	}
+	if (router.getCurrentUrl())
+		return router.getCurrentUrl();
 
+	return router.getInitialUrl();
+}
+
+export function useLoaderData() {
+	let router=useRouter();
+	useEventUpdate(router,"change");
+
+	return router.getLoaderData();
+	return null;
+}
+
+export function Route({path, loader, children}) {
+	let barrier=useIsoBarrier();
+	let router=useRouter();
+	let iso=useIsoContext();
+	useEventUpdate(router,"change");
+
+	useIsoMemo(async()=>{
+		if (urlMatchPath(router.getPendingUrl(),path)) {
+			let pendingUrl=router.getPendingUrl();
+			if (router.getPendingUrl()!=router.getCurrentUrl()) {
+				let loaderData;
+				if (loader) {
+					//await new Promise(r=>setTimeout(r,1000));
+					loaderData=await loader(router.getPendingUrl());
+				}
+
+				if (router.getPendingUrl()==pendingUrl) {
+					router.setLoaderData(loaderData);
+					router.setCurrentUrl(router.getPendingUrl());
+
+					if (!iso.isSsr()) {
+						if (window.location!=router.getCurrentUrl()) {
+							history.scrollRestoration="manual";
+							history.pushState(null,null,router.getCurrentUrl());
+						}
+
+						setTimeout(()=>{
+							window.scrollTo(0,0);
+						},0);
+					}
+				}
+			}
+			barrier();
+		}
+
+		else {
+			barrier();
+		}
+	},[router.getPendingUrl()]);
+
+	let theChildren;
 	if (urlMatchPath(router.getCurrentUrl(),path))
-		return createElement(IsoIdNamespace,{name: "route"},children);
+		theChildren=children;
+
+	return createElement(IsoIdNamespace,{},theChildren);
 }
