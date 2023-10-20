@@ -45,6 +45,10 @@ class Router extends EventTarget {
 		this.dispatchEvent(new Event("change"));
 	}
 
+	redirect(url) {
+		this.setPendingUrl(url);
+	}
+
 	setPendingUrl(url) {
 		this.pendingUrl=new URL(url,this.initialUrl).toString();
 		this.dispatchEvent(new Event("change"));
