@@ -14,6 +14,8 @@ To get started, run `npx create-isoq <project name>` or `yarn create isoq <proje
 
 ## API
 
+* [useIsoMemo](#useisomemo)
+
 ### useIsoMemo
 ```js
 import {useIsoMemo} from "isoq";
