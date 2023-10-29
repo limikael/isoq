@@ -75,7 +75,7 @@ should return a promise containing data for the page. This data will be made ava
 Similar to the html `a` tag, but will not cause the page to reload. Instead the browser url will change, and the route will be re-matched.
 
 ### useRouteUrl
-Similar to `iso.getUrl()` but will also cause a refresh if the current url changes.
+Similar to `iso.getUrl()` but will also cause a re-render of the component where it is used if the current url changes.
 
 ### useLoaderData
 Get the current data that has been made available to the current route via its loader function.
