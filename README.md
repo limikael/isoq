@@ -16,7 +16,13 @@ to deploy your app in an edge environment, such as [Cloudflare Workers](https://
 
 To get started, run `npx create-isoq <project name>` or `yarn create isoq <project name>` to create a starter-project.
 
-Also, see the [examples](https://github.com/limikael/isoq/tree/master/examples).
+Also, see the [examples](https://github.com/limikael/isoq/tree/master/examples). The examples are individual packages, so in order to run them,
+clone this repository, cd into an example dir, and run:
+
+```
+    yarn install
+    yarn start
+```
 
 ## API
 
