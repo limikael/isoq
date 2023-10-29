@@ -15,6 +15,15 @@ To get started, run `npx create-isoq <project name>` or `yarn create isoq <proje
 ## API
 
 * [useIsoMemo](#useIsoMemo)
+* [useIsoRef](#useIsoRef)
+* [useIsoBarrier](#useIsoBarrier)
+* [useIsoContext](#useIsoContext)
+* [Head](#Head)
+* [Route](#Route)
+* [Link](#Link)
+* [useRouteUrl](#useRouteUrl)
+* [useLoaderData](#useLoaderData)
+* [useIsLoading](#useIsLoading)
 
 ### useIsoMemo
 ```js
