@@ -12,6 +12,8 @@ There exists a set of primitives as hooks so that data can flow seamlessly betwe
 
 To get started, run `npx create-isoq <project name>` or `yarn create isoq <project name>` to create a starter-project.
 
+Also, see the [examples](https://github.com/limikael/isoq/tree/master/examples).
+
 ## API
 
 * [useIsoMemo](#useIsoMemo)
