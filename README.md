@@ -8,6 +8,10 @@ The basic way it works is by generating a middleware to be included in your app.
 The basic premise is to have one single application entry point that is run both on the server and the client.
 There exists a set of primitives as hooks so that data can flow seamlessly between the server and client.
 
+Isoq is a build tool, and the artifact that gets created comes in the form of a *middleware* to be loaded into
+a server framework. Currently, the [Hono](https://hono.dev/) framework is best supported, which makes it easy
+to deploy your app in an edge environment, such as [Cloudflare Workers](https://workers.cloudflare.com/).
+
 ## Getting started
 
 To get started, run `npx create-isoq <project name>` or `yarn create isoq <project name>` to create a starter-project.
