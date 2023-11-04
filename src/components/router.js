@@ -1,5 +1,5 @@
 import {createContext, useContext} from "react";
-import {urlMatchPath} from "../utils/js-util.js";
+import {urlMatchPath, waitEvent} from "../utils/js-util.js";
 import {useIsoRef, useIsoContext, useIsoMemo, useIsoBarrier} from "isoq";
 import {useEventUpdate} from "../utils/react-util.js";
 import {createElement, Fragment} from "react";
@@ -45,13 +45,30 @@ class Router extends EventTarget {
 		this.dispatchEvent(new Event("change"));
 	}
 
-	redirect(url) {
-		this.setPendingUrl(url);
-	}
-
 	setPendingUrl(url) {
 		this.pendingUrl=new URL(url,this.initialUrl).toString();
 		this.dispatchEvent(new Event("change"));
+	}
+
+	markCurrentUrlStale() {
+		let u=new URL(this.currentUrl);
+		u.searchParams.set("__stale",crypto.randomUUID());
+		this.currentUrl=u.toString();
+		//console.log("marked stale: "+this.currentUrl);
+
+		this.dispatchEvent(new Event("change"));
+	}
+
+	async redirect(url, options={}) {
+		if (options.forceReload)
+			this.markCurrentUrlStale();
+
+		this.setPendingUrl(url);
+		while (this.pendingUrl!=this.currentUrl) {
+			//console.log("waiting for change");
+			await waitEvent(this,"change");
+			//console.log("done waiting, current="+this.currentUrl+" pending: "+this.pendingUrl);
+		}
 	}
 
 	setLoaderData(loaderData) {
@@ -176,7 +193,7 @@ export function Route({path, loader, children}) {
 		else {
 			barrier();
 		}
-	},[router.getPendingUrl()]);
+	},[router.getPendingUrl(),router.getCurrentUrl()]);
 
 	let theChildren;
 	if (urlMatchPath(router.getCurrentUrl(),path))

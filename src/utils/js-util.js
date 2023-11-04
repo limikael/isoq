@@ -26,3 +26,14 @@ export function urlMatchPath(url, path) {
 
 	return true;	
 }
+
+export function waitEvent(o, event) {
+	return new Promise(resolve=>{
+		function listener() {
+			o.removeEventListener(event,listener);
+			resolve();
+		}
+
+		o.addEventListener(event,listener);
+	});
+}
