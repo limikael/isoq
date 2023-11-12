@@ -4,20 +4,30 @@ import IsoqSsr from "./IsoqSsr.js";
 import {render as renderToString} from "preact-render-to-string";
 
 export default class IsoqServer {
-	constructor({clientModule, clientSource}) {
+	constructor({clientModule, clientSource, clientSourceMap}) {
 		this.clientModule=clientModule;
 		this.clientSource=clientSource;
+		this.clientSourceMap=clientSourceMap;
 	}
 
 	async handleRequest(req, {localFetch, props, clientPathname, setGlobalLocation}) {
 		if (!clientPathname)
 			clientPathname="/client.js";
 
-		if (new URL(req.url).pathname==clientPathname
-				&& this.clientSource) {
+		let pathname=new URL(req.url).pathname;
+
+		if (pathname==clientPathname && this.clientSource) {
 			return new Response(this.clientSource,{
 				headers: {
 					"Content-Type": "text/javascript"
+				}
+			});
+		}
+
+		if (pathname==clientPathname+".map" && this.clientSourceMap) {
+			return new Response(this.clientSourceMap,{
+				headers: {
+					"Content-Type": "application/json"
 				}
 			});
 		}

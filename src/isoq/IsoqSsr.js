@@ -3,6 +3,8 @@ import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "preact/compat";
 import {RouterProvider} from "../components/router.js";
 import {IsoIdNamespace} from "../components/useIsoId.js";
+import DefaultErrorFallback from "./DefaultErrorFallback.js";
+import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 
 class Barrier {
 	constructor(id) {
@@ -46,19 +48,24 @@ export default class IsoqSsr {
 		if (typeof this.props=="function")
 			this.props=this.props(req);
 
-		this.element=createElement(
-			IsoContext.Provider,
-			{value: this},
-			createElement(
-				IsoIdNamespace,
-				{name: "root"},
-				createElement(
-					RouterProvider,
-					{url: req.url},
-					createElement(root,this.props)
+		this.element=
+			createElement(IsoContext.Provider,{value: this},
+				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
+					createElement(IsoIdNamespace,{name: "root"},
+						createElement(RouterProvider,{url: req.url},
+							createElement(root,this.props)
+						)
+					)
 				)
-			)
-		);
+			);
+	}
+
+	setErrorFallback(fallback) {
+		this.errorFallback=fallback;
+	}
+
+	setError(error) {
+		this.error=error;
 	}
 
 	getServerRef=(id, initial)=>{
@@ -127,7 +134,6 @@ export default class IsoqSsr {
 
 	async wait() {
 		for (let id in this.barriers) {
-			//console.log("waiting for completion: "+id);
 			await this.barriers[id].promise;
 		}
 
@@ -146,25 +152,51 @@ export default class IsoqSsr {
 		this.effects.push(fn);
 	}
 
+	renderError() {
+		return renderToString(
+			createElement(this.errorFallback,{error:this.error})
+		);		
+	}
+
 	renderPass() {
+		if (this.error)
+			return this.renderError();
+
 		this.headChildren="";
 		this.effects=[];
 		if (this.setGlobalLocation)
 			global.location=new URL(this.req.url);
 
-		let result=renderToString(this.element);
-		for (let effect of this.effects) {
-			let cleanup=effect();
-			if (cleanup)
-				cleanup();
+		try {
+			let result=renderToString(this.element);
+			for (let effect of this.effects) {
+				let cleanup=effect();
+				if (cleanup)
+					cleanup();
+			}
+
+			return result;
 		}
 
-		return result;
+		catch (e) {
+			this.error=e;
+			return this.renderError();
+		}
+	}
+
+	stringifyError() {
+		if (!this.error)
+			return JSON.stringify(null);
+
+		return JSON.stringify({
+			message: this.error.message,
+			stack: this.error.stack
+		});
 	}
 
 	async render() {
 		let renderResult=this.renderPass();
-		while (this.hasPromises()) {
+		while (this.hasPromises() && !this.error) {
 			await this.wait();
 			renderResult=this.renderPass();
 		}
@@ -187,6 +219,7 @@ export default class IsoqSsr {
 					<div id="isoq">
 						${renderResult}
 					</div>
+					<script>window.__isoError=${this.stringifyError()}</script>
 					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
 					<script>window.__isoRefs=${JSON.stringify(this.refs)}</script>
 					<script src="${this.clientPathname}" type="module"></script>

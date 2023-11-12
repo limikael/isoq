@@ -46,7 +46,7 @@ export default class Bundler {
 			bundle: true,
 			splitting: this.splitting,
 			minify: this.minify,
-			//sourcemap: true,
+			sourcemap: true,
 			plugins: [
 				moduleAlias({
 					"@browser": path.resolve(this.browser),
@@ -58,12 +58,21 @@ export default class Bundler {
 		});
 
 		let source=null;
+		let sourceMapSource=null;
 		if (!this.contentdir) {
 			source=fs.readFileSync(path.join(this.outdir,"client.js"),"utf8");
+			sourceMapSource=fs.readFileSync(path.join(this.outdir,"client.js.map"),"utf8");
 		}
 
-		let content=`export default ${JSON.stringify(source)};`;
-		fs.writeFileSync(path.join(this.outdir,"client.src.js"),content);
+		fs.writeFileSync(
+			path.join(this.outdir,"client.src.js"),
+			`export default ${JSON.stringify(source)};`
+		);
+
+		fs.writeFileSync(
+			path.join(this.outdir,"client.src.map.js"),
+			`export default ${JSON.stringify(sourceMapSource)};`
+		);
 
 		if (this.mw && this.mw!="none") {
 			this.log("Bundling "+this.mw+" middleware...");
@@ -95,6 +104,7 @@ export default class Bundler {
 					moduleAlias({
 						"@browser": path.resolve(this.browser),
 						"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
+						"@clientSourceMap": path.resolve(path.join(this.outdir,"client.src.map.js")),
 						"react": "preact/compat",
 						"react-dom": "preact/compat",
 						"react/jsx-runtime": "preact/jsx-runtime"

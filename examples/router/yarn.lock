@@ -321,10 +321,8 @@ is-number@^7.0.0:
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-7.0.0.tgz#7535345b896734d5f80c4d06c50955527a14f12b"
   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
 
-isoq@^1.0.0:
+"isoq@file:../..":
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/isoq/-/isoq-1.0.0.tgz#c9ad05e35a0d9877b1ada688326ac9d9c42c91de"
-  integrity sha512-rkqMQBffLbEHXItSx/Y1ZLAjxiaLwMAr5UHXRZADTBfpUPm0YUYQt2gXpvL6/io4zuprkpkPAON4Lew1VlP5zg==
   dependencies:
     esbuild "^0.19.2"
     preact "^10.17.1"

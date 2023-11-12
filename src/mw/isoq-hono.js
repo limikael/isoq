@@ -1,6 +1,7 @@
 import IsoqServer from "../isoq/IsoqServer.js";
 import Browser from "@browser";
 import clientSource from "@clientSource";
+import clientSourceMap from "@clientSourceMap";
 
 export default (conf={})=>{
 	if (conf.req)
@@ -8,6 +9,7 @@ export default (conf={})=>{
 
 	let server=new IsoqServer({
 		clientSource: clientSource,
+		clientSourceMap: clientSourceMap,
 		clientModule: Browser,
 	});
 

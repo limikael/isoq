@@ -4,11 +4,13 @@ import {useAsyncMemo} from "../utils/react-util.js";
 import {jsonEq} from "../utils/js-util.js";
 import {useIsoRef} from "./useIsoRef.js";
 import {useIsoBarrier} from "./useIsoBarrier.js";
+import {useIsoErrorBoundary} from "./IsoErrorBoundary.js";
 
 export function useIsoMemo(fn, deps=[]) {
 	let iso=useIsoContext();
 	let ref=useIsoRef();
 	let barrier=useIsoBarrier();
+	let throwError=useIsoErrorBoundary();
 
 	// Server
 	if (iso.isSsr()) {
@@ -16,15 +18,22 @@ export function useIsoMemo(fn, deps=[]) {
 			return ref.current.data;
 
 		(async()=>{
-			ref.current={deps: deps};
-			ref.current.data=await fn();
+			try {
+				ref.current={deps: deps};
+				ref.current.data=await fn();
+			}
+
+			catch (e) {
+				throwError(e);
+			}
+
 			barrier();
 		})();
 	}
 
 	// Client
 	else {
-		useAsyncMemo(async()=>{
+		let memoRes=useAsyncMemo(async()=>{
 			if (ref.current && jsonEq(ref.current.deps,deps))
 				return;
 
@@ -37,6 +46,11 @@ export function useIsoMemo(fn, deps=[]) {
 
 			return {};
 		},deps);
+
+		if (memoRes instanceof Error) {
+			throwError(memoRes);
+			return;
+		}
 
 		if (ref.current && jsonEq(ref.current.deps,deps))
 			return ref.current.data;

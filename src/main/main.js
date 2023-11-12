@@ -7,3 +7,4 @@ export {useIsoBarrier} from "../components/useIsoBarrier.js";
 export {useIsoContext, useIsoUrl} from "../isoq/IsoContext.js";
 export {useIsoId, IsoIdNamespace} from "../components/useIsoId.js";
 export {Link, Route, useLoaderData, useIsLoading, useRouterUrl, useRouter} from "../components/router.js";
+export {IsoErrorBoundary, useIsoErrorBoundary} from "../components/IsoErrorBoundary.js";

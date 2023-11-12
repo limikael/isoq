@@ -4,6 +4,7 @@ import {useIsoRef, useIsoContext, useIsoMemo, useIsoBarrier} from "isoq";
 import {useEventUpdate} from "../utils/react-util.js";
 import {createElement, Fragment} from "react";
 import {IsoIdNamespace} from "./useIsoId.js";
+import {useIsoErrorBoundary} from "./IsoErrorBoundary.js";
 
 class Router extends EventTarget {
 	constructor(isoContext, loaderDataRef) {
@@ -159,6 +160,7 @@ export function Route({path, loader, children}) {
 	let barrier=useIsoBarrier();
 	let router=useRouter();
 	let iso=useIsoContext();
+	let throwError=useIsoErrorBoundary();
 	useEventUpdate(router,"change");
 
 	useIsoMemo(async()=>{
@@ -168,7 +170,15 @@ export function Route({path, loader, children}) {
 				let loaderData;
 				if (loader) {
 					//await new Promise(r=>setTimeout(r,1000));
-					loaderData=await loader(router.getPendingUrl());
+					try {
+						loaderData=await loader(router.getPendingUrl());
+					}
+
+					catch (e) {
+						throwError(e);
+						barrier();
+						return;
+					}
 				}
 
 				if (router.getPendingUrl()==pendingUrl) {

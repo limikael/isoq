@@ -37,7 +37,7 @@ export function useAsyncMemo(fn, deps=[]) {
 			}
 
 			catch (e) {
-				console.error(e);
+				//console.error(e);
 				if (!queueRef.current)
 					setVal(e);
 			}
