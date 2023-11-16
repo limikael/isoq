@@ -61,8 +61,15 @@ class Router extends EventTarget {
 	}
 
 	async redirect(url, options={}) {
+		if (!options.forceReload) {
+			if (this.resolveUrl(url)==this.pendingUrl)
+				return;
+		}
+
 		if (options.forceReload)
 			this.markCurrentUrlStale();
+
+		//console.log("redirect: "+url);
 
 		this.setPendingUrl(url);
 		while (this.pendingUrl!=this.currentUrl) {
