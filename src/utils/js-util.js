@@ -37,3 +37,34 @@ export function waitEvent(o, event) {
 		o.addEventListener(event,listener);
 	});
 }
+
+export function parseCookie(str) {
+	if (!str)
+		return {};
+
+	return (
+	  	str
+		    .split(';')
+		    .map(v => v.split('='))
+		    .reduce((acc, v) => {
+		    	if (v.length==2)
+					acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+
+				return acc;
+		    }, {})
+	)
+}
+
+export function stringifyCookie(key, value, options={}) {
+	let s=encodeURIComponent(key)+"="+encodeURIComponent(value)+";";
+	if (options.expires)
+		s+="expires="+new Date(options.expires).toUTCString()+";";
+
+	if (options.path)
+		s+="path="+options.path+";"
+
+	else
+		s+="path=/;"
+
+	return s;
+}

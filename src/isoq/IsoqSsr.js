@@ -5,6 +5,8 @@ import {RouterProvider} from "../components/router.js";
 import {IsoIdNamespace} from "../components/useIsoId.js";
 import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
+import {parseCookie, stringifyCookie} from "../utils/js-util.js";
+import favicon from "./favicon.js";
 
 class Barrier {
 	constructor(id) {
@@ -44,6 +46,13 @@ export default class IsoqSsr {
 		this.props=props;
 		this.setGlobalLocation=setGlobalLocation;
 		this.serverRefs={};
+
+		this.cookies={};
+		let parsedCookies=parseCookie(req.headers.get("cookie"));
+		for (let k in parsedCookies)
+			this.cookies[k]={value: parsedCookies[k]};
+
+		this.cookieDispatcher=new EventTarget();
 
 		if (typeof this.props=="function")
 			this.props=this.props(req);
@@ -106,7 +115,7 @@ export default class IsoqSsr {
 	}
 
 	redirect(targetUrl) {
-		let headers=new Headers();
+		let headers=this.getCookieHeaders();
 		headers.set("location",targetUrl);
 		this.response=new Response("Moved",{
 			status: 302,
@@ -196,7 +205,7 @@ export default class IsoqSsr {
 
 	async render() {
 		let renderResult=this.renderPass();
-		while (this.hasPromises() && !this.error) {
+		while (!this.error && this.hasPromises()) {
 			await this.wait();
 			renderResult=this.renderPass();
 		}
@@ -229,6 +238,17 @@ export default class IsoqSsr {
 	}
 
 	async getResponse() {
+		let u=new URL(this.req.url);
+		if (u.pathname=="/favicon.ico") {
+			let response=await fetch("data:image/png;base64,"+favicon);
+			let blob=await response.blob();
+			return new Response(blob,{
+				headers: {
+					"Content-Type": "image/x-icon"
+				}
+			});
+		}
+
 		let content=await this.render();
 
 		if (this.response)
@@ -237,10 +257,28 @@ export default class IsoqSsr {
 		if (!content)
 			return;
 
-		return new Response(content,{
-			headers: {
-				"Content-Type": "text/html"
-			}
-		});
+		let h=this.getCookieHeaders();
+		h.set("content-type","text/html");
+
+		return new Response(content,{headers: h});
+	}
+
+	getCookieHeaders() {
+		let h=new Headers();
+		for (let k in this.cookies)
+			if (this.cookies[k].modified)
+				h.append("set-cookie",stringifyCookie(k,this.cookies[k].value,this.cookies[k]))
+
+		return h;
+	}
+
+	getCookie(key) {
+		if (this.cookies[key])
+			return this.cookies[key].value;
+	}
+
+	setCookie(key, value, options={}) {
+		this.cookies[key]={value, modified: true, ...options};
+		this.cookieDispatcher.dispatchEvent(new Event(key));
 	}
 }

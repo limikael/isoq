@@ -9,7 +9,7 @@ function Home() {
 		//console.log("client side...");
 		//throw new Error("Throwing an error, just because...");
 
-		useEffect(()=>{
+		/*useEffect(()=>{
 			setTimeout(()=>{
 				try {
 					throw new Error("This is an error...");
@@ -20,7 +20,7 @@ function Home() {
 				}
 
 			},1000);
-		},[]);
+		},[]);*/
 	}
 
 	return (
@@ -41,7 +41,7 @@ SomePage.loader=async()=>{
 
 	await new Promise(r=>setTimeout(r,1000));
 
-	throw new Error("Loader fail");
+	//throw new Error("Loader fail");
 
 	return "123";
 }

@@ -1,7 +1,10 @@
+import {parseCookie, stringifyCookie} from "../utils/js-util.js";
+
 export default class IsoqClient {
 	constructor(refs) {
 		this.refs=refs;
 		this.req=new Request(window.location);
+		this.cookieDispatcher=new EventTarget();
 	}
 
 	getIsoRef(id) {
@@ -36,5 +39,15 @@ export default class IsoqClient {
 	}
 
 	unresolveBarrier() {
+	}
+
+	getCookie(key) {
+		let parsedCookie=parseCookie(window.document.cookie);
+		return parsedCookie[key];
+	}
+
+	setCookie(key, value, options={}) {
+		document.cookie=stringifyCookie(key,value,options);
+		this.cookieDispatcher.dispatchEvent(new Event(key));
 	}
 }
