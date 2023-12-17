@@ -2,8 +2,8 @@ import {createContext, useContext} from "react";
 import {urlMatchPath, waitEvent} from "../utils/js-util.js";
 import {useIsoRef, useIsoContext, useIsoMemo, useIsoBarrier} from "isoq";
 import {useEventUpdate} from "../utils/react-util.js";
-import {createElement, Fragment} from "react";
-import {IsoIdNamespace} from "./useIsoId.js";
+import {createElement, Fragment, lazy as reactLazy, Suspense} from "react";
+import {IsoIdNamespace, useIsoId, IsoIdRoot} from "./useIsoId.js";
 import {useIsoErrorBoundary} from "./IsoErrorBoundary.js";
 
 class Router extends EventTarget {
@@ -95,6 +95,7 @@ let RouterContext=createContext();
 export function RouterProvider({url, children}) {
 	let iso=useIsoContext();
 	let ref=useIsoRef(null,true);
+	//console.log("router provider, ref="+ref.id);
 	let loaderDataRef=useIsoRef();
 	if (!ref.current)
 		ref.current=new Router(iso,loaderDataRef);
@@ -163,15 +164,25 @@ export function useLoaderData() {
 	return null;
 }
 
-export function Route({path, loader, children}) {
+export function Route({path, loader, children, lazy}) {
 	let barrier=useIsoBarrier();
 	let router=useRouter();
 	let iso=useIsoContext();
 	let throwError=useIsoErrorBoundary();
+	let isoId=useIsoId();
+	let lazyElement=useIsoRef(null,true);
 	useEventUpdate(router,"change");
 
 	useIsoMemo(async()=>{
 		if (urlMatchPath(router.getPendingUrl(),path)) {
+			//console.log("here..");
+
+			if (lazy && !lazyElement.current) {
+				let l=lazy();
+				lazyElement.current=reactLazy(()=>l);
+				await l;
+			}
+
 			let pendingUrl=router.getPendingUrl();
 			if (router.getPendingUrl()!=router.getCurrentUrl()) {
 				let loaderData;
@@ -212,9 +223,29 @@ export function Route({path, loader, children}) {
 		}
 	},[router.getPendingUrl(),router.getCurrentUrl()]);
 
-	let theChildren;
-	if (urlMatchPath(router.getCurrentUrl(),path))
-		theChildren=children;
+	let theChildren=[];
+	if (urlMatchPath(router.getCurrentUrl(),path)) {
+		//console.log("rendering matched: "+path+" lazy: "+lazyElement.current);
 
-	return createElement(IsoIdNamespace,{},theChildren);
+		if (lazyElement.current) {
+			console.log("rendering lazy");
+
+			theChildren.push(
+				createElement("div",{},
+					createElement(Suspense,{},
+						createElement(lazyElement.current,{})
+					)
+				)
+			)
+		}
+
+		if (children) {
+			if (Array.isArray(children))
+				theChildren.push(...children);
+
+			else theChildren.push(children);
+		}
+	}
+
+	return createElement(IsoIdRoot,{name:"route-"+isoId},theChildren);
 }

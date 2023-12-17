@@ -1,8 +1,9 @@
 import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
+import prepass from "preact-ssr-prepass";
 import {createElement} from "preact/compat";
 import {RouterProvider} from "../components/router.js";
-import {IsoIdNamespace} from "../components/useIsoId.js";
+import {IsoIdNamespace, IsoIdRoot} from "../components/useIsoId.js";
 import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
@@ -45,7 +46,6 @@ export default class IsoqSsr {
 		this.barriers={};
 		this.props=props;
 		this.setGlobalLocation=setGlobalLocation;
-		this.serverRefs={};
 
 		this.cookies={};
 		let parsedCookies=parseCookie(req.headers.get("cookie"));
@@ -60,7 +60,7 @@ export default class IsoqSsr {
 		this.element=
 			createElement(IsoContext.Provider,{value: this},
 				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
-					createElement(IsoIdNamespace,{name: "root"},
+					createElement(IsoIdRoot,{name: "root"},
 						createElement(RouterProvider,{url: req.url},
 							createElement(root,this.props)
 						)
@@ -77,19 +77,10 @@ export default class IsoqSsr {
 		this.error=error;
 	}
 
-	getServerRef=(id, initial)=>{
-		if (!this.serverRefs[id]) {
-			this.serverRefs[id]={
-				current: initial
-			}
-		}
-
-		return this.serverRefs[id];
-	}
-
 	getIsoRef=(id, initial)=>{
 		if (!this.refs[id])
 			this.refs[id]={
+				//id: id, // remove!!
 				current: initial
 			};
 
@@ -142,14 +133,21 @@ export default class IsoqSsr {
 	}
 
 	async wait() {
+		if (this.error)
+			throw this.error;
+
 		for (let id in this.barriers) {
 			await this.barriers[id].promise;
 		}
 
-		//console.log("done waiting...");
+		if (this.error)
+			throw this.error;
 	}
 
 	hasPromises() {
+		if (this.error)
+			throw this.error;
+
 		for (let id in this.barriers)
 			if (!this.barriers[id].isResolved())
 				return true;
@@ -157,40 +155,14 @@ export default class IsoqSsr {
 		return false;
 	}
 
-	registerEffect(fn) {
+	/*registerEffect(fn) {
 		this.effects.push(fn);
-	}
+	}*/
 
 	renderError() {
 		return renderToString(
 			createElement(this.errorFallback,{error:this.error})
 		);		
-	}
-
-	renderPass() {
-		if (this.error)
-			return this.renderError();
-
-		this.headChildren="";
-		this.effects=[];
-		if (this.setGlobalLocation)
-			global.location=new URL(this.req.url);
-
-		try {
-			let result=renderToString(this.element);
-			for (let effect of this.effects) {
-				let cleanup=effect();
-				if (cleanup)
-					cleanup();
-			}
-
-			return result;
-		}
-
-		catch (e) {
-			this.error=e;
-			return this.renderError();
-		}
 	}
 
 	stringifyError() {
@@ -204,13 +176,26 @@ export default class IsoqSsr {
 	}
 
 	async render() {
-		let renderResult=this.renderPass();
-		while (!this.error && this.hasPromises()) {
-			await this.wait();
-			renderResult=this.renderPass();
+		let renderResult,head;
+
+		try {
+			await prepass(this.element);
+			while (this.hasPromises()) {
+				await this.wait();
+				await prepass(this.element);
+			}
+
+			this.headChildren="";
+			renderResult=renderToString(this.element);
+			head=renderToString(this.headChildren);
 		}
 
-		let head=renderToString(this.headChildren);
+		catch (e) {
+			this.error=e;
+			return this.renderError();
+		}
+
+		//console.log(this.refs);
 
 		for (let k of Object.keys(this.refs)) {
 			if (this.refs[k].local)

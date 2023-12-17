@@ -1,5 +1,5 @@
 {
-  "name": "router",
+  "name": "contentdir",
   "version": "1.0.0",
   "type": "module",
   "license": "UNLICENSED",
@@ -7,7 +7,7 @@
     "start": "yarn run dev:nodemon",
     "dev:server": "yarn run build:isoq && node src/server.js",
     "dev:nodemon": "nodemon --watch ../../src --watch src -e jsx,js --exec yarn run dev:server",
-    "build:isoq": "isoq src/index.jsx --no-minify"
+    "build:isoq": "isoq src/index.jsx --no-minify --contentdir public --splitting"
   },
   "dependencies": {
     "@hono/node-server": "^1.2.0",

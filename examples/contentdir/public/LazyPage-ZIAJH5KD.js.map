@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/LazyPage.jsx"],
+  "sourcesContent": ["import {useIsoRef} from \"isoq\";\n\nexport default function LazyPage() {\n\tlet ref=useIsoRef();\n\tconsole.log(\"rendering lazy page, ref=\"+ref.current);\n\n\tif (!ref.current) {\n\t\tref.current=\"hello world\";\n\t}\n\n\treturn (\n\t\t<div>this is a lazy page</div>\n\t);\n}"],
+  "mappings": ";;;;;;AAEe,SAAR,WAA4B;AAClC,MAAI,MAAI,UAAU;AAClB,UAAQ,IAAI,8BAA4B,IAAI,OAAO;AAEnD,MAAI,CAAC,IAAI,SAAS;AACjB,QAAI,UAAQ;AAAA,EACb;AAEA,SACC,kBAAC,aAAI,qBAAmB;AAE1B;",
+  "names": []
+}
