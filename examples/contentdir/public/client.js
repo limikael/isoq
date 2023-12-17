@@ -12,7 +12,7 @@ import {
   useIsLoading,
   useLoaderData,
   y
-} from "./chunk-TYZ7JE3X.js";
+} from "./chunk-XIP6BHOB.js";
 
 // src/index.jsx
 function Home() {
@@ -31,7 +31,7 @@ SomePage.loader = async () => {
 function Main() {
   let loading = useIsLoading();
   let bg = loading ? "#0000ff" : "#ffffff";
-  return /* @__PURE__ */ y(g, null, /* @__PURE__ */ y("div", { style: `width: 100%; height: 3px; background-color: ${bg}` }), /* @__PURE__ */ y("div", null, /* @__PURE__ */ y(Link, { href: "/" }, "Home"), "|", /* @__PURE__ */ y(Link, { href: "/somepage" }, "Some Page"), "|", /* @__PURE__ */ y(Link, { href: "/lazypage" }, "Lazy Page")), /* @__PURE__ */ y(Route, { path: "/" }, /* @__PURE__ */ y(Home, null)), /* @__PURE__ */ y(Route, { path: "/somepage", loader: SomePage.loader }, /* @__PURE__ */ y(SomePage, null)), /* @__PURE__ */ y(Route, { path: "/lazypage", lazy: () => import("./LazyPage-ZIAJH5KD.js") }));
+  return /* @__PURE__ */ y(g, null, /* @__PURE__ */ y("div", { style: `width: 100%; height: 3px; background-color: ${bg}` }), /* @__PURE__ */ y("div", null, /* @__PURE__ */ y(Link, { href: "/" }, "Home"), "|", /* @__PURE__ */ y(Link, { href: "/somepage" }, "Some Page"), "|", /* @__PURE__ */ y(Link, { href: "/lazypage" }, "Lazy Page")), /* @__PURE__ */ y(Route, { path: "/" }, /* @__PURE__ */ y(Home, null)), /* @__PURE__ */ y(Route, { path: "/somepage", loader: SomePage.loader }, /* @__PURE__ */ y(SomePage, null)), /* @__PURE__ */ y(Route, { path: "/lazypage", lazy: () => import("./LazyPage-I4RVDI5Z.js") }));
 }
 
 // ../../src/isoq/IsoqClient.js

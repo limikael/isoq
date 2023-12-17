@@ -155,10 +155,6 @@ export default class IsoqSsr {
 		return false;
 	}
 
-	/*registerEffect(fn) {
-		this.effects.push(fn);
-	}*/
-
 	renderError() {
 		return renderToString(
 			createElement(this.errorFallback,{error:this.error})

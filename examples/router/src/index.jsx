@@ -1,13 +1,6 @@
 import {Link, Route, useLoaderData, useIsoContext, useIsLoading, useIsoRef} from "isoq";
 import {useEffect, lazy, Suspense, useMemo} from "react";
 
-export function ErrorBoundary(props) { return props.children; }
-ErrorBoundary.prototype.componentDidCatch = function (err) {
-	console.log("did catch...");
-
-  if (err && err.then) this.__d = true;
-};
-
 function Home() {
 	return (
 		<p>This is the home page</p>
@@ -58,7 +51,4 @@ export default function Main() {
 
 		<Route path="/lazypage" lazy={()=>import("./LazyPage.jsx")}/>
 	</>);
-
-//		<Route path="/lazypage" lazy={async ()=>{/*await new Promise(r=>setTimeout(r,1000));*/ return import("./LazyPage.jsx")}}/>
-
 }

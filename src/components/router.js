@@ -181,6 +181,7 @@ export function Route({path, loader, children, lazy}) {
 				let l=lazy();
 				lazyElement.current=reactLazy(()=>l);
 				await l;
+				await new Promise(r=>setTimeout(r,0));
 			}
 
 			let pendingUrl=router.getPendingUrl();
