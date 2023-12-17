@@ -228,7 +228,7 @@ export function Route({path, loader, children, lazy}) {
 		//console.log("rendering matched: "+path+" lazy: "+lazyElement.current);
 
 		if (lazyElement.current) {
-			console.log("rendering lazy");
+			//console.log("rendering lazy");
 
 			theChildren.push(
 				createElement("div",{},
