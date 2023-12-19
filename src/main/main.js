@@ -1,4 +1,5 @@
 export {Head} from "../components/Head.js";
+export {urlGetArgs, urlGetParams} from "../utils/js-util.js";
 export {useIsoMemo} from "../components/useIsoMemo.js";
 export {useIsoRef} from "../components/useIsoRef.js";
 export {useIsoBarrier} from "../components/useIsoBarrier.js";
