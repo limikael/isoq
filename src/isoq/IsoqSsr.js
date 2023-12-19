@@ -223,8 +223,13 @@ export default class IsoqSsr {
 	async getResponse() {
 		let u=new URL(this.req.url);
 		if (u.pathname=="/favicon.ico") {
-			let response=await fetch("data:image/png;base64,"+favicon);
-			let blob=await response.blob();
+			var byteString = atob(favicon);
+			var ab = new ArrayBuffer(byteString.length);
+			var ia = new Uint8Array(ab);
+			for (var i = 0; i < byteString.length; i++)
+			    ia[i] = byteString.charCodeAt(i);
+
+			let blob=new Blob([ab]);
 			return new Response(blob,{
 				headers: {
 					"Content-Type": "image/x-icon"
