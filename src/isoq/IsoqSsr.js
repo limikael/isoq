@@ -173,15 +173,17 @@ export default class IsoqSsr {
 
 	async render() {
 		let renderResult,head;
-		this.headChildren="";
+		this.headChildren=[];
 
 		try {
 			await prepass(this.element);
+			this.headChildren=[];
 			renderResult=renderToString(this.element);
 
 			while (this.hasPromises()) {
 				await this.wait();
 				await prepass(this.element);
+				this.headChildren=[];
 				renderResult=renderToString(this.element);
 			}
 
