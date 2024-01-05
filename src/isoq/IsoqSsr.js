@@ -39,6 +39,7 @@ class Barrier {
 
 export default class IsoqSsr {
 	constructor(root, req, {localFetch, props, clientPathname, setGlobalLocation}) {
+		this.root=root;
 		this.req=req;
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
@@ -53,20 +54,6 @@ export default class IsoqSsr {
 			this.cookies[k]={value: parsedCookies[k]};
 
 		this.cookieDispatcher=new EventTarget();
-
-		if (typeof this.props=="function")
-			this.props=this.props(req);
-
-		this.element=
-			createElement(IsoContext.Provider,{value: this},
-				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
-					createElement(IsoIdRoot,{name: "root"},
-						createElement(RouterProvider,{url: req.url},
-							createElement(root,this.props)
-						)
-					)
-				)
-			);
 	}
 
 	setErrorFallback(fallback) {
@@ -172,6 +159,23 @@ export default class IsoqSsr {
 	}
 
 	async render() {
+		let props=this.props;
+		if (typeof props=="function")
+			props=await props(this.req);
+
+		//console.log("rendering with props: ",props);
+
+		this.element=
+			createElement(IsoContext.Provider,{value: this},
+				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
+					createElement(IsoIdRoot,{name: "root"},
+						createElement(RouterProvider,{url: this.req.url},
+							createElement(this.root,props)
+						)
+					)
+				)
+			);
+
 		let renderResult,head;
 		this.headChildren=[];
 
@@ -214,7 +218,7 @@ export default class IsoqSsr {
 						${renderResult}
 					</div>
 					<script>window.__isoError=${this.stringifyError()}</script>
-					<script>window.__isoProps=${JSON.stringify(this.props)}</script>
+					<script>window.__isoProps=${JSON.stringify(props)}</script>
 					<script>window.__isoRefs=${JSON.stringify(this.refs)}</script>
 					<script src="${this.clientPathname}" type="module"></script>
 				</body>

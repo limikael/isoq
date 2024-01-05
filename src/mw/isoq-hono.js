@@ -29,13 +29,9 @@ export default (conf={})=>{
 		}
 
 		try {
-			let props=conf.props;
-			if (typeof props=="function")
-				props=await props(c);
-
 			let response=await server.handleRequest(c.req.raw, {
 				localFetch, 
-				props: props,
+				props: conf.props,
 				setGlobalLocation: conf.setGlobalLocation
 			});
 
