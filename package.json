@@ -1,6 +1,7 @@
 {
   "name": "isoq",
-  "version": "1.0.7",
+  "scripts": {},
+  "version": "1.0.9",
   "license": "MIT",
   "type": "module",
   "bin": {
