@@ -51,6 +51,26 @@ class Router extends EventTarget {
 		this.dispatchEvent(new Event("change"));
 	}
 
+	postNavScroll() {
+		let u=new URL(this.getCurrentUrl());
+		let el;
+
+		if (u.hash) {
+			let hash=u.hash.replace("#","");
+			let els=window.document.getElementsByName(hash);
+			if (els.length)
+				el=els[0];
+		}
+
+		if (el)
+			el.scrollIntoView({
+				behavior: 'smooth'
+			});
+
+		else
+			window.scrollTo(0,0);
+	}
+
 	markCurrentUrlStale() {
 		let u=new URL(this.currentUrl);
 		u.searchParams.set("__stale",crypto.randomUUID());
@@ -131,7 +151,7 @@ export function Link({children, ...props}) {
 		if (props.href) {
 			if (router.resolveUrl(props.href)==router.getCurrentUrl() &&
 					router.resolveUrl(props.href)==router.getPendingUrl()) {
-				window.scrollTo(0,0);
+				router.postNavScroll();
 			}
 
 			else
@@ -210,9 +230,7 @@ export function Route({path, loader, children, lazy}) {
 							history.pushState(null,null,router.getCurrentUrl());
 						}
 
-						setTimeout(()=>{
-							window.scrollTo(0,0);
-						},0);
+						setTimeout(()=>router.postNavScroll(),0);
 					}
 				}
 			}
