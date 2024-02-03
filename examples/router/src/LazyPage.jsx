@@ -5,6 +5,7 @@ export default function LazyPage() {
 	console.log("rendering lazy page, ref="+ref.current);
 
 	if (!ref.current) {
+		console.log("setting iso ref...");
 		ref.current="hello world";
 	}
 
