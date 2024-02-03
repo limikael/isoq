@@ -4,6 +4,7 @@ import {useIsoId} from "./useIsoId.js";
 
 export function useIsoRef(initial, local) {
 	let id=useIsoId();
+	console.log("useisoid: "+id);
 	let iso=useIsoContext();
 	let actualRef=useRef(initial);
 

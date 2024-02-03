@@ -180,14 +180,18 @@ export default class IsoqSsr {
 		this.headChildren=[];
 
 		try {
+			console.log("running prepass...");
 			await prepass(this.element);
 			this.headChildren=[];
+			console.log("running renderToString...");
 			renderResult=renderToString(this.element);
 
 			while (this.hasPromises()) {
 				await this.wait();
+				console.log("running prepass...");
 				await prepass(this.element);
 				this.headChildren=[];
+				console.log("running renderToString...");
 				renderResult=renderToString(this.element);
 			}
 
