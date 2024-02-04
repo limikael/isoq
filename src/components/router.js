@@ -197,6 +197,9 @@ export function Route({path, loader, children, lazy}) {
 		if (urlMatchPath(router.getPendingUrl(),path)) {
 			//console.log("here..");
 
+			if (lazy)
+				throw new Error("lazy is not working!");
+
 			if (lazy && !lazyElement.current) {
 				let l=lazy();
 				lazyElement.current=reactLazy(()=>l);
