@@ -124,7 +124,7 @@ export function RouterProvider({url, children}) {
 
 	return createElement(
 		RouterContext.Provider,
-		{value: ref.current},
+		{value: ref.current, key: "router"},
 		children
 	);
 }
@@ -266,5 +266,5 @@ export function Route({path, loader, children, lazy}) {
 		}
 	}
 
-	return createElement(IsoIdRoot,{name:"route-"+isoId},theChildren);
+	return createElement(IsoIdRoot,{},theChildren);
 }

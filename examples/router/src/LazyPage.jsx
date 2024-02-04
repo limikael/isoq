@@ -1,6 +1,9 @@
-import {useIsoRef} from "isoq";
+import {useIsoRef, useIsoId} from "isoq";
 
 export default function LazyPage() {
+	/*let id=useIsoId();
+	console.log("lazyid: "+id);*/
+
 	let ref=useIsoRef();
 	console.log("rendering lazy page, ref="+ref.current);
 

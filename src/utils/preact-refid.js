@@ -2,6 +2,7 @@ import {options} from "preact";
 
 let currentVNode;
 let refIndex;
+let includeFnames=false;
 
 let oldRender=options.__r;
 options.__r=vnode=>{
@@ -22,12 +23,22 @@ function vnodePath(vnode) {
 
 	let name=vnode.type;
 	if (typeof name=="function") {
-		name=name.name;
+		if (includeFnames)
+			name=name.name;
+
+		else
+			name="C";
 	}
 
 	let key=vnode.key;
 	if (!key) {
-		if (vnode.__ && vnode.__.__k)
+		if (vnode.__i>=0)
+			key=vnode.__i;
+
+/*		else
+			key=vnode.__.__k.indexOf(vnode);*/
+
+		else if (vnode.__ && vnode.__.__k)
 			key=vnode.__.__k.indexOf(vnode);
 
 		else
@@ -36,7 +47,7 @@ function vnodePath(vnode) {
 
 	let parentPath=vnodePath(vnode.__);
 
-	return parentPath+"/"+name+"["+key+"]";
+	return parentPath+(parentPath?"/":"")+name+key;
 }
 
 export function useRefId() {
