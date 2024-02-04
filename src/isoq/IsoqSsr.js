@@ -1,6 +1,6 @@
 import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
-import prepass from "preact-ssr-prepass";
+//import prepass from "preact-ssr-prepass";
 import {createElement} from "preact/compat";
 import {RouterProvider} from "../components/router.js";
 import {IsoIdNamespace, IsoIdRoot} from "../components/useIsoId.js";
@@ -108,8 +108,19 @@ export default class IsoqSsr {
 	fetch=async (url, options={})=> {
 		if (url.startsWith("/")) {
 			url=new URL(this.req.url).origin+url;
-			let req=new Request(url,options);
-			return await this.localFetch(req);
+			let req=new Request(url.toString(),options);
+
+			if (this.req.headers.get("cookie"))
+				req.headers.set("cookie",this.req.headers.get("cookie"));
+
+			let localFetchResponse=await this.localFetch(req);
+			if (localFetchResponse.status!=200) {
+				console.log("****** local fetch failed");
+				console.log("local fetch request: ",req);
+				console.log("local fetch request: ",localFetchResponse);
+			}
+
+			return localFetchResponse;
 		}
 
 		return await fetch(url,options);
@@ -180,14 +191,18 @@ export default class IsoqSsr {
 		this.headChildren=[];
 
 		try {
-			await prepass(this.element);
+			//console.log("running prepass...");
+			//await prepass(this.element);
 			this.headChildren=[];
+			//console.log("running renderToString...");
 			renderResult=renderToString(this.element);
 
 			while (this.hasPromises()) {
 				await this.wait();
-				await prepass(this.element);
+				//console.log("running prepass...");
+				//await prepass(this.element);
 				this.headChildren=[];
+				//console.log("running renderToString...");
 				renderResult=renderToString(this.element);
 			}
 

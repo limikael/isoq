@@ -1,0 +1,18 @@
+{
+  "name": "isoref",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "yarn run dev:nodemon",
+    "dev:server": "yarn run build:isoq && node src/server.js",
+    "dev:nodemon": "nodemon --watch ../../src --watch src -e jsx,js --exec yarn run dev:server",
+    "build:isoq": "isoq src/index.jsx --no-minify --contentdir public --splitting"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.2.0",
+    "hono": "^3.7.2",
+    "isoq": "link:../..",
+    "nodemon": "^3.0.1"
+  }
+}
