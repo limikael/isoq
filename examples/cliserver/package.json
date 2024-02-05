@@ -1,0 +1,13 @@
+{
+  "name": "cliserver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "isoq --mw=raw src/index.jsx && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-raw.js"
+  },
+  "dependencies": {
+    "isoq": "link:../..",
+    "serve-fetch": "^1.0.1"
+  }
+}

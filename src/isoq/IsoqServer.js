@@ -10,7 +10,9 @@ export default class IsoqServer {
 		this.clientSourceMap=clientSourceMap;
 	}
 
-	async handleRequest(req, {localFetch, props, clientPathname, setGlobalLocation}) {
+	async handleRequest(req, options={}) {
+		let {localFetch, props, clientPathname}=options;
+
 		if (!clientPathname)
 			clientPathname="/client.js";
 
@@ -36,7 +38,6 @@ export default class IsoqServer {
 			localFetch,
 			props,
 			clientPathname,
-			setGlobalLocation
 		});
 
 		return await ssr.getResponse();

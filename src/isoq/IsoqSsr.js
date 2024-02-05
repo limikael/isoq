@@ -38,7 +38,7 @@ class Barrier {
 }
 
 export default class IsoqSsr {
-	constructor(root, req, {localFetch, props, clientPathname, setGlobalLocation}) {
+	constructor(root, req, {localFetch, props, clientPathname}) {
 		this.root=root;
 		this.req=req;
 		this.localFetch=localFetch;
@@ -46,7 +46,6 @@ export default class IsoqSsr {
 		this.refs={};
 		this.barriers={};
 		this.props=props;
-		this.setGlobalLocation=setGlobalLocation;
 
 		this.cookies={};
 		let parsedCookies=parseCookie(req.headers.get("cookie"));

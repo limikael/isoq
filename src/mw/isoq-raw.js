@@ -12,3 +12,5 @@ let server=new IsoqServer({
 export async function handleRequest(req, options) {
 	return await server.handleRequest(req,options);
 }
+
+export default handleRequest;
