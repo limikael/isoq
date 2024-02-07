@@ -74,51 +74,49 @@ export default class Bundler {
 			`export default ${JSON.stringify(sourceMapSource)};`
 		);
 
-		if (this.mw && this.mw!="none") {
-			this.log("Bundling "+this.mw+" middleware...");
-			let mwSource;
-			switch (this.mw) {
-				case "hono":
-					mwSource="isoq-hono.js";
-					break;
+		this.log("Bundling request handler...");
+		/*let mwSource;
+		switch (this.mw) {
+			case "hono":
+				mwSource="isoq-hono.js";
+				break;
 
-				case "raw":
-					mwSource="isoq-raw.js";
-					break;
-			}
+			case "raw":
+				mwSource="isoq-raw.js";
+				break;
+		}*/
 
-			fs.writeFileSync(path.join(this.outdir,"package.json"),JSON.stringify({
-				name: "__ISOQ_MIDDLEWARE",
-				type: "module",
-				main: mwSource
-			}));
+		fs.writeFileSync(path.join(this.outdir,"package.json"),JSON.stringify({
+			name: "__ISOQ_MIDDLEWARE",
+			type: "module",
+			main: "isoq-request-handler.js"
+		}));
 
-			await esbuild.build({
-				...commonBuildOptions,
-				entryPoints: [path.join(__dirname,"../mw",mwSource)],
-				outdir: this.outdir,
-				bundle: true,
-				minify: this.minify,
-				//sourcemap: true,
-				plugins: [
-					moduleAlias({
-						"@browser": path.resolve(this.browser),
-						"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
-						"@clientSourceMap": path.resolve(path.join(this.outdir,"client.src.map.js")),
-						"react": "preact/compat",
-						"react-dom": "preact/compat",
-						"react/jsx-runtime": "preact/jsx-runtime"
-					})
-				],
-			});
+		await esbuild.build({
+			...commonBuildOptions,
+			entryPoints: [path.join(__dirname,"isoq-request-handler.js")],
+			outdir: this.outdir,
+			bundle: true,
+			minify: this.minify,
+			//sourcemap: true,
+			plugins: [
+				moduleAlias({
+					"@browser": path.resolve(this.browser),
+					"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
+					"@clientSourceMap": path.resolve(path.join(this.outdir,"client.src.map.js")),
+					"react": "preact/compat",
+					"react-dom": "preact/compat",
+					"react/jsx-runtime": "preact/jsx-runtime"
+				})
+			],
+		});
 
-			this.log("Middleware generated in: "+this.outdir);
-			if (this.contentdir)
-				this.log("Client javascript assets in: "+this.contentdir);
+		this.log("Middleware generated in: "+this.outdir);
+		if (this.contentdir)
+			this.log("Client javascript assets in: "+this.contentdir);
 
-			else
-				this.log("The middleware includes javascript assets.")
-		}
+		else
+			this.log("The middleware includes javascript assets.")
 	}
 
 	log(...args) {

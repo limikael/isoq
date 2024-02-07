@@ -20,11 +20,6 @@ let yargsConf=yargs(hideBin(process.argv))
         type: "boolean",
         default: true
     })
-    .option("mw",{
-        description: "Type of middleware to build.",
-        choices: ["hono","raw","none"],
-        default: "hono"
-    })
     .option("purge-old-js",{
         description: "Remove all .js files from contentdir before building. Beware!",
         type: "boolean",
