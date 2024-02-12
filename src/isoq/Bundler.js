@@ -63,7 +63,7 @@ export default class Bundler {
 			bundle: true,
 			splitting: this.splitting,
 			minify: this.minify,
-			sourcemap: true,
+			sourcemap: this.sourcemap,
 			plugins: [
 				moduleAlias({
 					"@browser": path.resolve(this.browser),
@@ -78,7 +78,9 @@ export default class Bundler {
 		let sourceMapSource=null;
 		if (!this.contentdir) {
 			source=fs.readFileSync(path.join(this.outdir,"client.js"),"utf8");
-			sourceMapSource=fs.readFileSync(path.join(this.outdir,"client.js.map"),"utf8");
+
+			if (this.sourcemap)
+				sourceMapSource=fs.readFileSync(path.join(this.outdir,"client.js.map"),"utf8");
 		}
 
 		fs.writeFileSync(
@@ -98,13 +100,25 @@ export default class Bundler {
 			main: "isoq-request-handler.js"
 		}));
 
+		let runtimeOptions={
+			sourcemap: this.sourcemap
+		};
+
+		fs.writeFileSync(
+			path.join(this.outdir,"global-options.js"),
+			`globalThis.__ISOQ_OPTIONS=${JSON.stringify(runtimeOptions)}`
+		);
+
 		await esbuild.build({
 			...commonBuildOptions,
 			entryPoints: [path.join(__dirname,"isoq-request-handler.js")],
+			inject: [...commonBuildOptions.inject,path.join(this.outdir,"global-options.js")],
 			outdir: this.outdir,
 			bundle: true,
 			minify: this.minify,
-			sourcemap: true,
+			sourcemap: this.sourcemap,
+			//platform: "node",
+			external: ["source-map","fs","path","url"],
 			plugins: [
 				moduleAlias({
 					"@browser": path.resolve(this.browser),

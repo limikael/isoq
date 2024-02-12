@@ -9,6 +9,7 @@ class ErrorBoundaryComponent extends Component {
 	}
 
 	static getDerivedStateFromError(error) {
+		console.error(error);
 		return { error };
 	}
 
@@ -21,8 +22,18 @@ class ErrorBoundaryComponent extends Component {
 		if (this.state.error)
 			error=this.state.error;
 
-		if (error)
+		if (error) {
+			if (!this.props.iso.isSsr()) {
+				(async()=>{
+					let response=await fetch("/client.js.map",window.location);
+					let map=await response.json();
+					console.log(map);
+					console.log("handling error...");
+				})();
+			}
+
 			return createElement(this.props.fallback,{error: error});
+		}
 
 		return this.props.children;
 	}
@@ -39,7 +50,11 @@ export function IsoErrorBoundary({fallback, children, error}) {
 
 	return (
 		createElement(IsoErrorBoundaryContext.Provider,{value:setCurrentError},
-			createElement(ErrorBoundaryComponent,{fallback: fallback, error: currentError},
+			createElement(ErrorBoundaryComponent,{
+					fallback: fallback, 
+					error: currentError,
+					iso: iso
+				},
 				children
 			)
 		)
