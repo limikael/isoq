@@ -209,6 +209,7 @@ export default class IsoqSsr {
 		}
 
 		catch (e) {
+			console.error(e);
 			this.error=e;
 			return this.renderError();
 		}

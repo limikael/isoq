@@ -11,7 +11,24 @@ export default class Bundler {
 		Object.assign(this,conf);
 	}
 
+	countSymLinks(fn,cnt) {
+		if (fs.existsSync(fn)) {
+			if (fs.lstatSync(fn).isSymbolicLink())
+				cnt.links++;
+
+			else
+				cnt.nonlinks++;
+		}
+	}
+
 	async bundle() {
+		let linkCount={links: 0, nonlinks: 0};
+		this.countSymLinks("node_modules/isoq",linkCount);
+		this.countSymLinks("node_modules/preact",linkCount);
+
+		if (linkCount.links && linkCount.nonlinks)
+			throw new Error("One of isoq or preact is symlinked. They should both be, or none.");
+
 		if (fs.existsSync(this.outdir))
 			fs.rmSync(this.outdir,{recursive: true});
 
@@ -75,17 +92,6 @@ export default class Bundler {
 		);
 
 		this.log("Bundling request handler...");
-		/*let mwSource;
-		switch (this.mw) {
-			case "hono":
-				mwSource="isoq-hono.js";
-				break;
-
-			case "raw":
-				mwSource="isoq-raw.js";
-				break;
-		}*/
-
 		fs.writeFileSync(path.join(this.outdir,"package.json"),JSON.stringify({
 			name: "__ISOQ_MIDDLEWARE",
 			type: "module",
@@ -98,7 +104,7 @@ export default class Bundler {
 			outdir: this.outdir,
 			bundle: true,
 			minify: this.minify,
-			//sourcemap: true,
+			sourcemap: true,
 			plugins: [
 				moduleAlias({
 					"@browser": path.resolve(this.browser),

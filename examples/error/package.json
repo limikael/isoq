@@ -1,0 +1,12 @@
+{
+  "name": "error",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "isoq index.jsx && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js"
+  },
+  "dependencies": {
+    "isoq": "file:../..",
+    "serve-fetch": "^1.0.1"
+  }
+}

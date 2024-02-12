@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "isoq --mw=raw src/index.jsx && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-raw.js"
+    "start": "isoq src/index.jsx && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js"
   },
   "dependencies": {
     "isoq": "link:../..",
