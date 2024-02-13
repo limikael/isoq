@@ -1,54 +1,53 @@
-import {SourceMapConsumer} from "source-map";
-import fs from "fs";
 import * as stackTraceParser from 'stacktrace-parser';
-import path from "path";
-import url from "url";
+import resolvePath from "@einheit/path-resolve";
 
-class SourceMapper {
+export default class SourceMapper {
 	constructor() {
 	}
 
-	transformError(error) {
+	async transformError(error) {
+		let sourceMapConsumer=await new this.SourceMapConsumer(this.map);
+		let stack=stackTraceParser.parse(error.stack);
 
-	}
-}
+		let entryLines=[];
+		for (let entry of stack) {
+			let original=sourceMapConsumer.originalPositionFor({
+				line: entry.lineNumber,
+				column: entry.column,
+			});
 
-export async function applySourceMapToError(error, sourceMap, SourceMapConsumer) {
-	let map=JSON.parse(fs.readFileSync(sourceMapFn,"utf8"));
-	let mapDir=path.dirname(sourceMapFn);
-	let sourceMapConsumer=await new SourceMapConsumer(sourceMap);
-	let stack=stackTraceParser.parse(error.stack);
+			let sourceUrl=this.resolveSource(original.source);
 
-	let entryLines=[];
-	for (let entry of stack) {
-		let original=sourceMapConsumer.originalPositionFor({
-			line: entry.lineNumber,
-			column: entry.column,
-		});
+			if (original.name) {
+				entryLines.push(
+					"    at "+original.name+" ("+sourceUrl+":"+original.line+":"+original.column+")"
+				);
+			}
 
-		/*let resolvedSource=path.resolve(mapDir,original.source);
-		let sourceUrl=url.pathToFileURL(resolvedSource).href;*/
-
-		sourceUrl=original.source;
-
-		if (original.name) {
-			entryLines.push(
-				"    at "+original.name+" ("+sourceUrl+":"+original.line+":"+original.column+")"
-			);
+			else {
+				entryLines.push(
+					"    at "+sourceUrl+":"+original.line+":"+original.column
+				);
+			}
 		}
 
-		else {
-			entryLines.push(
-				"    at "+sourceUrl+":"+original.line+":"+original.column
-			);
+		if (sourceMapConsumer.destroy)
+			sourceMapConsumer.destroy();
+
+		return {
+			message: String(error),
+			stack: String(error)+"\n"+entryLines.join("\n"),
+			toString: ()=>error.toString()
 		}
 	}
 
-	sourceMapConsumer.destroy();
+	resolveSource(sourceName) {
+		let resolvedSource=resolvePath(this.mapDir,sourceName);
 
-	return {
-		message: String(error),
-		stack: String(error)+"\n"+entryLines.join("\n"),
-		toString: ()=>error.toString()
+		if (resolvedSource.startsWith("/"))
+			return "file://"+resolvedSource;
+
+		else
+			return "file:///"+resolvedSource;
 	}
 }

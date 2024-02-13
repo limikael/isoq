@@ -117,6 +117,7 @@ export function RouterProvider({url, children}) {
 	let ref=useIsoRef(null,true);
 	//console.log("router provider, ref="+ref.id);
 	let loaderDataRef=useIsoRef();
+	//console.log("loaderdata ref id: "+loaderDataRef.id);
 	if (!ref.current)
 		ref.current=new Router(iso,loaderDataRef);
 
@@ -181,7 +182,6 @@ export function useLoaderData() {
 	useEventUpdate(router,"change");
 
 	return router.getLoaderData();
-	return null;
 }
 
 export function Route({path, loader, children, lazy}) {

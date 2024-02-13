@@ -7,7 +7,7 @@ import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
 import favicon from "./favicon.js";
-import SourceMapper "../utils/SourceMapper.js";
+import SourceMapperNode from "isoq/source-mapper-node";
 
 class Barrier {
 	constructor(id) {
@@ -156,19 +156,12 @@ export default class IsoqSsr {
 		let e=this.error;
 
 		if (globalThis.__ISOQ_OPTIONS.sourcemap) {
-			let mapper=new SourceMapper();
-			mapper.map=JSON.parse(fs.readFileSync(
-				"node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js.map",
-				"utf8"
-			));
+			let mapper=new SourceMapperNode(
+				"node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js.map"
+			);
 
-			
+			e=await mapper.transformError(e);
 		}
-
-
-		let sourceMapFn="node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js.map";
-		if (globalThis.__ISOQ_OPTIONS.sourcemap)
-			e=await applySourceMapToError(this.error,sourceMapFn);
 
 		console.error(e.stack);
 
@@ -247,6 +240,7 @@ export default class IsoqSsr {
 				    "lib/mappings.wasm": "https://unpkg.com/source-map@0.7.3/lib/mappings.wasm",
 				  });
 				</script>
+				<script>window.__sourcemapRoot=${JSON.stringify(globalThis.__ISOQ_OPTIONS.sourcemapRoot)}</script>
 			`;
 		}
 

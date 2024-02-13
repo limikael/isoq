@@ -1,6 +1,8 @@
 import {Component, createContext, useState, createElement, useContext} from "react";
 import {useEventUpdate} from "../utils/react-util.js";
 import {useIsoContext} from "../isoq/IsoContext.js";
+import SourceMapper from "../utils/SourceMapper.js";
+import resolvePath from "@einheit/path-resolve";
 
 class ErrorBoundaryComponent extends Component {
 	componentDidCatch(error, info) {
@@ -22,13 +24,22 @@ class ErrorBoundaryComponent extends Component {
 		if (this.state.error)
 			error=this.state.error;
 
+		if (this.state.transformedError)
+			error=this.state.transformedError;
+
 		if (error) {
-			if (!this.props.iso.isSsr()) {
+			if (!this.props.iso.isSsr() && !this.state.transformed &&
+					window.sourceMap) {
+				this.setState({transformed: true});
 				(async()=>{
+					let mapper=new SourceMapper();
 					let response=await fetch("/client.js.map",window.location);
-					let map=await response.json();
-					console.log(map);
-					console.log("handling error...");
+					mapper.map=await response.json();
+					mapper.SourceMapConsumer=window.sourceMap.SourceMapConsumer;
+					mapper.mapDir=window.__sourcemapRoot;
+
+					let transformedError=await mapper.transformError(error);
+					this.setState({transformedError});
 				})();
 			}
 

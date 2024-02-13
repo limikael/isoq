@@ -16,10 +16,10 @@ function vnodePath(vnode) {
 	if (!vnode)
 		return "";
 
-	if (typeof vnode.type=="function" &&
+	/*if (typeof vnode.type=="function" &&
 			vnode.type.name=="g") {
 		return vnodePath(vnode.__)
-	}
+	}*/
 
 	let name=vnode.type;
 	if (typeof name=="function") {
@@ -35,7 +35,7 @@ function vnodePath(vnode) {
 		if (vnode.__i>=0)
 			key=vnode.__i;
 
-/*		else
+		/*else
 			key=vnode.__.__k.indexOf(vnode);*/
 
 		else if (vnode.__ && vnode.__.__k)

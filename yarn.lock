@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@einheit/path-resolve@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@einheit/path-resolve/-/path-resolve-1.2.0.tgz#9899dd7a5e4def444a54c8909c4015f60b6402e3"
+  integrity sha512-OQQivnPZr9aMIL1x5zkbXbxEreWivAvVCZMkPEJksT090PTH4AmyAJ3dR72DMIG3WYKB3xKppSSyhp3piLdpMQ==
+
 "@esbuild/android-arm64@0.19.2":
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/@esbuild/android-arm64/-/android-arm64-0.19.2.tgz#bc35990f412a749e948b792825eef7df0ce0e073"
@@ -199,11 +204,6 @@ preact-render-to-string@^6.2.1:
   integrity sha512-5t7nFeMUextd53igL3GAakAAMaUD+dVWDHaRYaeh1tbPIjQIBtgJnMw6vf8VS/lviV0ggFtkgebatPxvtJsXyQ==
   dependencies:
     pretty-format "^3.8.0"
-
-preact-ssr-prepass@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/preact-ssr-prepass/-/preact-ssr-prepass-1.2.1.tgz#efe27b49571ff0b9a8e00ea7b7dede84708112dc"
-  integrity sha512-bLgbUfy8nL+PZghAPpyk9MF+cmXjdwEnxYPaJBmwbzFQqzIz8dQVBqjwB60RqZ9So/vIf6BRfHCiwFGuMCyfbQ==
 
 preact@^10.17.1:
   version "10.17.1"

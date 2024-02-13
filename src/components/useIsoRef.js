@@ -13,6 +13,7 @@ export function useIsoRef(initial, local) {
 		if (local)
 			ref.local=true;
 
+		ref.id=id;
 		return ref;
 	}
 
@@ -23,6 +24,7 @@ export function useIsoRef(initial, local) {
 			iso.markIsoRefStale(id);
 		}
 
+		actualRef.id=id;
 		return actualRef;
 	}
 }
