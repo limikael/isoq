@@ -1,6 +1,5 @@
 import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
-//import prepass from "preact-ssr-prepass";
 import {createElement} from "preact/compat";
 import {RouterProvider} from "../components/router.js";
 import {IsoIdNamespace, IsoIdRoot} from "../components/useIsoId.js";
@@ -8,6 +7,7 @@ import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
 import favicon from "./favicon.js";
+import SourceMapperNode from "isoq/source-mapper-node";
 
 class Barrier {
 	constructor(id) {
@@ -152,26 +152,40 @@ export default class IsoqSsr {
 		return false;
 	}
 
-	renderError() {
-		return renderToString(
-			createElement(this.errorFallback,{error:this.error})
+	async renderError() {
+		let e=this.error;
+
+		if (globalThis.__ISOQ_OPTIONS.sourcemap) {
+			let mapper=new SourceMapperNode(
+				"node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js.map"
+			);
+
+			e=await mapper.transformError(e);
+		}
+
+		console.error(e.stack);
+
+		let errorContent=renderToString(
+			createElement(this.errorFallback,{error:e})
 		);		
-	}
 
-	stringifyError() {
-		if (!this.error)
-			return JSON.stringify(null);
+		return `<!DOCTYPE html>
+			<html>
+				<head>
+					<title>Error</title>
+				</head>
+				${errorContent}
+			</html>`;
 
-		return JSON.stringify({
-			message: this.error.message,
-			stack: this.error.stack
-		});
 	}
 
 	async render() {
 		let props=this.props;
 		if (typeof props=="function")
 			props=await props(this.req);
+
+		if (!props)
+			props={};
 
 		//console.log("rendering with props: ",props);
 
@@ -209,21 +223,33 @@ export default class IsoqSsr {
 		}
 
 		catch (e) {
-			console.error(e);
 			this.error=e;
-			return this.renderError();
+			return await this.renderError();
 		}
 
-		//console.log(this.refs);
+		let sourceMapScripts="";
+		if (globalThis.__ISOQ_OPTIONS.sourcemap) {
+			sourceMapScripts=`
+				<script src="https://unpkg.com/source-map@0.7.3/dist/source-map.js"></script>
+				<script>
+				  sourceMap.SourceMapConsumer.initialize({
+				    "lib/mappings.wasm": "https://unpkg.com/source-map@0.7.3/lib/mappings.wasm",
+				  });
+				</script>
+				<script>window.__sourcemapRoot=${JSON.stringify(globalThis.__ISOQ_OPTIONS.sourcemapRoot)}</script>
+			`;
+		}
 
-		for (let k of Object.keys(this.refs)) {
-			if (this.refs[k].local)
-				delete this.refs[k];
+		let refs={};
+		for (let k in this.refs) {
+			if (this.refs[k].current && !this.refs[k].local)
+				refs[k]={current: this.refs[k].current};
 		}
 
 		return `<!DOCTYPE html>
 			<html>
 				<head>
+					${sourceMapScripts}
 					<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 					<meta charset="utf-8"/>
 					${head}
@@ -232,9 +258,8 @@ export default class IsoqSsr {
 					<div id="isoq">
 						${renderResult}
 					</div>
-					<script>window.__isoError=${this.stringifyError()}</script>
 					<script>window.__isoProps=${JSON.stringify(props)}</script>
-					<script>window.__isoRefs=${JSON.stringify(this.refs)}</script>
+					<script>window.__isoRefs=${JSON.stringify(refs)}</script>
 					<script src="${this.clientPathname}" type="module"></script>
 				</body>
 			</html>

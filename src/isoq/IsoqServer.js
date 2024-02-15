@@ -17,6 +17,7 @@ export default class IsoqServer {
 			clientPathname="/client.js";
 
 		let pathname=new URL(req.url).pathname;
+		//console.log("GET: "+pathname);
 
 		if (pathname==clientPathname && this.clientSource) {
 			return new Response(this.clientSource,{

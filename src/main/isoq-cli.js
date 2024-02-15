@@ -20,6 +20,11 @@ let yargsConf=yargs(hideBin(process.argv))
         type: "boolean",
         default: true
     })
+    .option("sourcemap",{
+        description: "Generate sourcemaps and show proper files and line numbers on errors. Works only in a Node.js env.",
+        type: "boolean",
+        default: false
+    })
     .option("purge-old-js",{
         description: "Remove all .js files from contentdir before building. Beware!",
         type: "boolean",

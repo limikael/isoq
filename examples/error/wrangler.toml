@@ -1,0 +1,3 @@
+name = 'isoq-test'
+compatibility_date = '2023-08-30'
+main = 'worker.js'

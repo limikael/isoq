@@ -1,17 +1,19 @@
 {
   "name": "isoq",
   "scripts": {},
-  "version": "1.0.14",
+  "version": "1.0.15",
   "license": "MIT",
   "type": "module",
   "bin": {
     "isoq": "src/main/isoq-cli.js"
   },
   "dependencies": {
+    "@einheit/path-resolve": "^1.2.0",
     "esbuild": "^0.19.2",
     "preact": "^10.17.1",
     "preact-render-to-string": "^6.2.1",
-    "preact-ssr-prepass": "^1.2.1",
+    "source-map": "^0.7.4",
+    "stacktrace-parser": "^0.1.10",
     "yargs": "^17.7.2"
   },
   "exports": {
@@ -26,6 +28,9 @@
     },
     "./preact-shim": {
       "import": "./src/utils/preact-shim.js"
+    },
+    "./source-mapper-node": {
+      "import": "./src/utils/SourceMapperNode.js"
     }
   }
 }

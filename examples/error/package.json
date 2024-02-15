@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "isoq index.jsx && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js"
+    "dev": "isoq index.jsx --sourcemap && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js",
+    "dev:wrangler": "isoq index.jsx && wrangler dev"
   },
   "dependencies": {
     "isoq": "file:../..",

@@ -63,7 +63,7 @@ export default class Bundler {
 			bundle: true,
 			splitting: this.splitting,
 			minify: this.minify,
-			sourcemap: true,
+			sourcemap: this.sourcemap,
 			plugins: [
 				moduleAlias({
 					"@browser": path.resolve(this.browser),
@@ -78,7 +78,9 @@ export default class Bundler {
 		let sourceMapSource=null;
 		if (!this.contentdir) {
 			source=fs.readFileSync(path.join(this.outdir,"client.js"),"utf8");
-			sourceMapSource=fs.readFileSync(path.join(this.outdir,"client.js.map"),"utf8");
+
+			if (this.sourcemap)
+				sourceMapSource=fs.readFileSync(path.join(this.outdir,"client.js.map"),"utf8");
 		}
 
 		fs.writeFileSync(
@@ -98,26 +100,52 @@ export default class Bundler {
 			main: "isoq-request-handler.js"
 		}));
 
+		let runtimeOptions={
+			sourcemap: this.sourcemap,
+			sourcemapRoot: path.resolve("node_modules/__ISOQ_MIDDLEWARE")
+		};
+
+		fs.writeFileSync(
+			path.join(this.outdir,"global-options.js"),
+			`globalThis.__ISOQ_OPTIONS=${JSON.stringify(runtimeOptions)}`
+		);
+
+			//"isoq/source-mapper-node": path.resolve(__dirname,"../utils/null.js")
+
+		let handlerExternal=["source-map","fs","path","url"];
+		let handlerAlias={
+			"@browser": path.resolve(this.browser),
+			"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
+			"@clientSourceMap": path.resolve(path.join(this.outdir,"client.src.map.js")),
+			"react": "preact/compat",
+			"react-dom": "preact/compat",
+			"react/jsx-runtime": "preact/jsx-runtime",
+		};
+
+		if (!this.sourcemap) {
+			handlerExternal=[];
+			handlerAlias["isoq/source-mapper-node"]=path.resolve(__dirname,"../utils/null.js")
+		}
+
 		await esbuild.build({
 			...commonBuildOptions,
 			entryPoints: [path.join(__dirname,"isoq-request-handler.js")],
+			inject: [...commonBuildOptions.inject,path.join(this.outdir,"global-options.js")],
 			outdir: this.outdir,
 			bundle: true,
 			minify: this.minify,
-			sourcemap: true,
+			sourcemap: this.sourcemap,
+			external: handlerExternal,
 			plugins: [
-				moduleAlias({
-					"@browser": path.resolve(this.browser),
-					"@clientSource": path.resolve(path.join(this.outdir,"client.src.js")),
-					"@clientSourceMap": path.resolve(path.join(this.outdir,"client.src.map.js")),
-					"react": "preact/compat",
-					"react-dom": "preact/compat",
-					"react/jsx-runtime": "preact/jsx-runtime"
-				})
+				moduleAlias(handlerAlias)
 			],
 		});
 
-		this.log("Middleware generated in: "+this.outdir);
+		this.log("Middleware "+
+			(this.sourcemap?"with sourcemap":"without sourcemap")+
+			" generated in: "+this.outdir
+		);
+
 		if (this.contentdir)
 			this.log("Client javascript assets in: "+this.contentdir);
 
