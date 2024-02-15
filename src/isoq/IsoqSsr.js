@@ -184,6 +184,9 @@ export default class IsoqSsr {
 		if (typeof props=="function")
 			props=await props(this.req);
 
+		if (!props)
+			props={};
+
 		//console.log("rendering with props: ",props);
 
 		this.element=
@@ -224,13 +227,6 @@ export default class IsoqSsr {
 			return await this.renderError();
 		}
 
-		//console.log(this.refs);
-
-		for (let k of Object.keys(this.refs)) {
-			if (this.refs[k].local)
-				delete this.refs[k];
-		}
-
 		let sourceMapScripts="";
 		if (globalThis.__ISOQ_OPTIONS.sourcemap) {
 			sourceMapScripts=`
@@ -244,6 +240,11 @@ export default class IsoqSsr {
 			`;
 		}
 
+		let refs={};
+		for (let k in this.refs) {
+			if (this.refs[k].current && !this.refs[k].local)
+				refs[k]={current: this.refs[k].current};
+		}
 
 		return `<!DOCTYPE html>
 			<html>
@@ -258,7 +259,7 @@ export default class IsoqSsr {
 						${renderResult}
 					</div>
 					<script>window.__isoProps=${JSON.stringify(props)}</script>
-					<script>window.__isoRefs=${JSON.stringify(this.refs)}</script>
+					<script>window.__isoRefs=${JSON.stringify(refs)}</script>
 					<script src="${this.clientPathname}" type="module"></script>
 				</body>
 			</html>
