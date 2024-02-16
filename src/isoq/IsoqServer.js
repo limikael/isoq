@@ -17,6 +17,9 @@ export default class IsoqServer {
 			clientPathname="/client.js";
 
 		let pathname=new URL(req.url).pathname;
+		if (req.method.toUpperCase()!="GET")
+			return;
+
 		//console.log("GET: "+pathname);
 
 		if (pathname==clientPathname && this.clientSource) {
