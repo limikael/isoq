@@ -18,7 +18,7 @@ export function urlGetParams(url) {
 	return Object.fromEntries(u.searchParams);
 }
 
-export function urlMatchPath(url, path) {
+/*export function urlMatchPath(url, path) {
 	if (!url)
 		return;
 
@@ -34,9 +34,9 @@ export function urlMatchPath(url, path) {
 			return false;
 
 	return true;	
-}
+}*/
 
-export function waitEvent(o, event) {
+/*export function waitEvent(o, event) {
 	return new Promise(resolve=>{
 		function listener() {
 			o.removeEventListener(event,listener);
@@ -45,7 +45,7 @@ export function waitEvent(o, event) {
 
 		o.addEventListener(event,listener);
 	});
-}
+}*/
 
 export function parseCookie(str) {
 	if (!str)

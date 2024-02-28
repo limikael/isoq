@@ -36,11 +36,14 @@ export function useIsoMemo(fn, deps=[]) {
 	// Client
 	else {
 		let memoRes=useAsyncMemo(async()=>{
-			if (ref.current && jsonEq(ref.current.deps,deps))
+			if (ref.current && jsonEq(ref.current.deps,deps)) {
+				barrier();
 				return;
+			}
 
 			ref.current=null;
 			let data=await fn();
+			barrier();
 			ref.current={
 				deps: deps,
 				data: data
@@ -54,8 +57,10 @@ export function useIsoMemo(fn, deps=[]) {
 			return;
 		}
 
-		if (ref.current && jsonEq(ref.current.deps,deps))
+		if (ref.current && jsonEq(ref.current.deps,deps)) {
+			barrier();
 			return ref.current.data;
+		}
 	}
 }
 

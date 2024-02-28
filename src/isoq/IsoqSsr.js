@@ -1,8 +1,6 @@
 import IsoContext from "./IsoContext.js";
 import {render as renderToString} from "preact-render-to-string";
 import {createElement} from "preact/compat";
-import {RouterProvider} from "../components/router.js";
-import {IsoIdNamespace, IsoIdRoot} from "../components/useIsoId.js";
 import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
@@ -192,11 +190,7 @@ export default class IsoqSsr {
 		this.element=
 			createElement(IsoContext.Provider,{value: this},
 				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
-					createElement(IsoIdRoot,{name: "root"},
-						createElement(RouterProvider,{url: this.req.url},
-							createElement(this.root,props)
-						)
-					)
+					createElement(this.root,props)
 				)
 			);
 
@@ -242,7 +236,7 @@ export default class IsoqSsr {
 
 		let refs={};
 		for (let k in this.refs) {
-			if (this.refs[k].current && !this.refs[k].local)
+			if (this.refs[k].current && this.refs[k].shared)
 				refs[k]={current: this.refs[k].current};
 		}
 

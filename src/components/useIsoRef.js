@@ -2,7 +2,10 @@ import {useRef} from "react";
 import {useIsoContext} from "../isoq/IsoContext.js";
 import {useIsoId} from "./useIsoId.js";
 
-export function useIsoRef(initial, local) {
+export function useIsoRef(initial, shared) {
+	if (shared===undefined)
+		shared=true;
+
 	let id=useIsoId();
 	//console.log("useisoid: "+id);
 	let iso=useIsoContext();
@@ -10,9 +13,7 @@ export function useIsoRef(initial, local) {
 
 	if (iso.isSsr()) {
 		let ref=iso.getIsoRef(id,initial);
-		if (local)
-			ref.local=true;
-
+		ref.shared=shared;
 		ref.id=id;
 		return ref;
 	}
