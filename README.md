@@ -102,7 +102,7 @@ let ref=useIsoRef();
 ref.current=/*...*/;
 ```
 Conceptually similar to the `useRef` hook in react. However, the `ref.current` value can be set on the server during server side rendering, 
-and the data placed there will be made available on the client side.
+and the data placed there will be made available on the client side during hydration.
 
 ### useIsoBarrier
 ```js
@@ -111,9 +111,10 @@ let resolver=useIsoBarrier();
 /*...*/
 resolver();
 ```
-Creates a [barrier](https://en.wikipedia.org/wiki/Barrier_(computer_science)) during server side rendering. 
-The delivery of the page to the client will be blocked until the resolver function is called. This is useful if you want to do
-some asyncronous work on the server. The resolver function has no effect on the client.
+Creates a [barrier](https://en.wikipedia.org/wiki/Barrier_(computer_science)) to suspend rendering of parent components. 
+During server side rendering, the delivery of the page to the client will be blocked until the resolver function is called. This is useful if you want to do
+some asyncronous work on the server. On the client side, this function works in conjunction with [IsoSuspense](#IsoSuspense) to suspend rendering and render 
+a fallback content.
 
 ### useIsoContext
 ```js
