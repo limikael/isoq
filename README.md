@@ -14,9 +14,7 @@ a server framework. This request handler is a function that takes a [Request](ht
 and returns a [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
 
 ## Getting started
-
 To get started, first create an application entry point, e.g. called `index.jsx`:
-
 ```jsx
 export default function() {
     return (<>
@@ -25,9 +23,30 @@ export default function() {
     </>);
 }
 ```
+Now, run:
+```bash
+isoq index.jsx
+```
+And you will get a file called `isoq-request-handler.js`. The generated file exports a single function which takes a `Request` and turns it into a `Response`. 
+We can now easily use e.g. the [Hono](https://hono.dev/) framework to let this file do its job on each request. We can create a file called `server.js` like this:
+```js
+import isoqRequestHandler from "isoq-request-handler.js";
+import {Hono} from 'hono';
+import {serve} from '@hono/node-server';
 
+const app=new Hono();
+app.get("*",c=>isoqRequestHandler(c.req.raw));
+
+serve(app,(info)=>{
+    console.log(`Listening on http://localhost:${info.port}`)
+})
+```
+Run the server with:
+```bash
+node server.js
+```
+Btw, you can change 
 ## Examples
-
 Also, see the [examples](https://github.com/limikael/isoq/tree/master/examples). The examples are individual packages, so in order to run them,
 clone this repository, cd into an example dir, and run:
 
@@ -37,7 +56,6 @@ clone this repository, cd into an example dir, and run:
 ```
 
 ## API
-
 * [useIsoMemo](#useIsoMemo)
 * [useIsoRef](#useIsoRef)
 * [useIsoBarrier](#useIsoBarrier)
@@ -86,6 +104,7 @@ Get a context with information related to the current rendering process. The ret
 
 * `iso.isSsr()` - Returns `true` or `false` depending on if the current render is happening on the server or the client.
 * `iso.getUrl()` - Get the current url being rendered.
+* `iso.redirect(url)` - Redirect to the specified url. When run on the server, this will generate a 302 response. When run on the client, `window.location` will be set.
 
 ### Head
 ```jsx
@@ -94,26 +113,7 @@ Get a context with information related to the current rendering process. The ret
 </Head>
 ```
 Can be used anywhere in the flow of the page, and will cause the children of the `Head` component to be rendered in the `<head>` element 
-of the page. 
-### Route
-```jsx
-<Route path="/some/path/*" loader={/*...*/}>
-    /*...*/
-</Route>
-```
-The child content will be conditionally rendered if the current path matches the specified path. The `loader` property is a function that
-should return a promise containing data for the page. This data will be made available to the page via the `useLoaderData` hook.
-### Link
-```jsx
-<Link href="/some/path">my link</Link>
-```
-Similar to the html `a` tag, but will not cause the page to reload. Instead the browser url will change, and the route will be re-matched.
-
-### useRouteUrl
-Similar to `iso.getUrl()` but will also cause a re-render of the component where it is used if the current url changes.
-
-### useLoaderData
-Get the current data that has been made available to the current route via its loader function.
+of the page.
 
 ### useIsLoading
-Returns `true` if data is currently being loaded for a route, `false` otherwise.
+Returns `true` if there are any unresolved barriers registered using `useIsoBarrier`.
