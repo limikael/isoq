@@ -15,7 +15,16 @@ and returns a [Response](https://developer.mozilla.org/en-US/docs/Web/API/Respon
 
 ## Getting started
 
-To get started, run `npx create-isoq <project name>` or `yarn create isoq <project name>` to create a starter-project.
+To get started, first create an application entry point, e.g. called `index.jsx`:
+
+```jsx
+export default function() {
+    return (<>
+        <h1>Hello</h1>
+        <p>Hello World...</p>
+    </>);
+}
+```
 
 ## Examples
 
