@@ -14,7 +14,11 @@ a server framework. This request handler is a function that takes a [Request](ht
 and returns a [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
 
 ## Getting started
-To get started, first create an application entry point, e.g. called `index.jsx`:
+First, install the `isoq` command line tool with:
+```bash
+npm install -g isoq
+```
+Then, create an application entry point, e.g. called `index.jsx`:
 ```jsx
 export default function() {
     return (<>
