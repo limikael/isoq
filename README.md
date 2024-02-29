@@ -45,11 +45,34 @@ Run the server with:
 ```bash
 node server.js
 ```
-Btw, you can change 
+Btw, you can change the name of the generated file using the `--out` option.
+## Command line options
+Type `isoq` to see a list of accepted options
+```
+isoq -- Isomorphic javascript middleware generator.
+
+Positionals:
+  entry point  Source file (required).
+
+Options:
+  --help          Show help                                            [boolean]
+  --version       Show version.                                        [boolean]
+  --contentdir    Generate content in this directory. Will require your own
+                  middleware to serve the content.
+  --splitting     Split code for dynamic client side import. Requires
+                  contentdir.                                          [boolean]
+  --minify        Minify client assets.                [boolean] [default: true]
+  --sourcemap     Generate sourcemaps and show proper files and line numbers on
+                  errors. Works only in a Node.js env.[boolean] [default: false]
+  --purge-old-js  Remove all .js files from contentdir before building. Beware!
+                                                                       [boolean]
+  --out           Output filename.          [default: "isoq-request-handler.js"]
+  --quiet         Suppress output.
+```
+
 ## Examples
 Also, see the [examples](https://github.com/limikael/isoq/tree/master/examples). The examples are individual packages, so in order to run them,
 clone this repository, cd into an example dir, and run:
-
 ```
     yarn install
     yarn start
@@ -61,10 +84,7 @@ clone this repository, cd into an example dir, and run:
 * [useIsoBarrier](#useIsoBarrier)
 * [useIsoContext](#useIsoContext)
 * [Head](#Head)
-* [Route](#Route)
-* [Link](#Link)
-* [useRouteUrl](#useRouteUrl)
-* [useLoaderData](#useLoaderData)
+* [IsoSuspense](#IsoSuspense)
 * [useIsLoading](#useIsLoading)
 
 ### useIsoMemo
@@ -108,6 +128,8 @@ Get a context with information related to the current rendering process. The ret
 
 ### Head
 ```jsx
+import {Head} from "isoq";
+// ...
 <Head>
     /*...*/
 </Head>
@@ -115,5 +137,18 @@ Get a context with information related to the current rendering process. The ret
 Can be used anywhere in the flow of the page, and will cause the children of the `Head` component to be rendered in the `<head>` element 
 of the page.
 
+### IsoSuspense
+```jsx
+import {IsoSuspense} from "isoq";
+function MySuspendingComponent() {
+  let barrier=useIsoBarrier();
+  // Load data or something... Then call barrier() to unsuspend the component.
+}
+// ...
+<IsoSuspense fallback={/*...*/}>
+  <MySuspendingComponent>
+</IsoSuspense>
+```
+A suspense mechanism that works both on the server and client. On the client, the fallback content will be redered while the component is suspended.
 ### useIsLoading
 Returns `true` if there are any unresolved barriers registered using `useIsoBarrier`.
