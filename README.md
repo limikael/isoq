@@ -1,20 +1,23 @@
 # isoq
-Isomorphic javascript middleware generator.
-
-Isoq is a tiny framework for isomorphic javascript apps using preact. 
-It tries to do one thing and one thing only and be agnostic about other things.
-The basic way it works is by generating a middleware to be included in your app.
+Isoq is a minimalistic framework for isomorphic javascript apps using preact. 
 
 The basic premise is to have one single application entry point that is run both on the server and the client.
-There exists a set of primitives as hooks so that data can flow seamlessly between the server and client.
+The code in this entry point will then be first be run on the server so that rendered HTML is delvered to the client and
+to search engines. The code will then be run again on the client, and the DOM tree will be rehydrated. You can see the
+execution of the app as being started on the server and do an initial render of the tree. Then, the client will take over
+and handler interactivity.
+There exists a set of primitives as hooks so that data can flow seamlessly between the server and client, notably [useIsoRef](#useIsoRef)
+which makes it possible to create refs on the server that the client later can access.
 
-Isoq is a build tool, and the artifact that gets created comes in the form of a *middleware* to be loaded into
-a server framework. Currently, the [Hono](https://hono.dev/) framework is best supported, which makes it easy
-to deploy your app in an edge environment, such as [Cloudflare Workers](https://workers.cloudflare.com/).
+Isoq is a build tool, and the generated artifact from the build process is a *request handler* to be loaded into
+a server framework. This request handler is a function that takes a [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request)
+and returns a [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
 
 ## Getting started
 
 To get started, run `npx create-isoq <project name>` or `yarn create isoq <project name>` to create a starter-project.
+
+## Examples
 
 Also, see the [examples](https://github.com/limikael/isoq/tree/master/examples). The examples are individual packages, so in order to run them,
 clone this repository, cd into an example dir, and run:
