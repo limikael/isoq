@@ -1,6 +1,6 @@
 import {useIsoContext, useIsoCookie} from "isoq";
 
-export default function Main() {
+export default function() {
 	let iso=useIsoContext();
 	let cookie2=useIsoCookie("cookie2");
 	console.log("cookie2: "+cookie2); //iso.getCookie("cookie2"));

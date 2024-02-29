@@ -1,7 +1,7 @@
 {
   "name": "isoq",
   "scripts": {},
-  "version": "1.0.19",
+  "version": "1.1.0",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -21,7 +21,7 @@
       "import": "./src/main/main.js"
     },
     "./bundler": {
-      "import": "./src/main/bundler.js"
+      "import": "./src/isoq/Bundler.js"
     },
     "./esbuild-util": {
       "import": "./src/utils/esbuild-util.js"

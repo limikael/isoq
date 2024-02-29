@@ -3,8 +3,16 @@
 import Bundler from "../isoq/Bundler.js";
 import yargs from "yargs/yargs";
 import {hideBin} from "yargs/helpers";
+import path from 'path';
+import {fileURLToPath} from 'url';
+import fs from "fs";
+import bundlerDefault from "../isoq/bundler-default.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+let pkg=JSON.parse(fs.readFileSync(path.join(__dirname,"../../package.json")));
 
 let yargsConf=yargs(hideBin(process.argv))
+    .version("version","Show version.",pkg.version)
     .positional("entry point",{
         description: "Source file (required).",
     })
@@ -18,20 +26,24 @@ let yargsConf=yargs(hideBin(process.argv))
     .option("minify",{
         description: "Minify client assets.",
         type: "boolean",
-        default: true
+        default: bundlerDefault.minify
     })
     .option("sourcemap",{
         description: "Generate sourcemaps and show proper files and line numbers on errors. Works only in a Node.js env.",
         type: "boolean",
-        default: false
+        default: bundlerDefault.sourcemap
     })
     .option("purge-old-js",{
         description: "Remove all .js files from contentdir before building. Beware!",
         type: "boolean",
     })
-    .option("outdir",{
+    /*.option("outdir",{
         description: "Generate middleware in this directory.",
         default: "node_modules/__ISOQ_MIDDLEWARE"
+    })*/
+    .option("out",{
+        description: "Output filename.",
+        default: bundlerDefault.out
     })
     .options("quiet",{
         description: "Suppress output.",
@@ -46,9 +58,6 @@ if (options._.length!=1) {
 	process.exit();
 }
 
-let bundler=new Bundler({
-	browser: options._[0],
-	...options
-});
+let bundler=new Bundler(options._[0],options);
 
 await bundler.bundle();

@@ -4,36 +4,8 @@ import {createElement} from "preact/compat";
 import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
-import favicon from "./favicon.js";
 import SourceMapperNode from "isoq/source-mapper-node";
-
-class Barrier {
-	constructor(id) {
-		this.resolved=false;
-		this.promise=new Promise(resolve=>{
-			this.promiseResolver=resolve
-		});
-
-		this.id=id;
-		this.resolve.barrierId=id;
-	}
-
-	resolve=()=>{
-		this.resolved=true;
-		this.promiseResolver();
-	}
-
-	unresolve() {
-		this.resolved=false;
-		this.promise=new Promise(resolve=>{
-			this.promiseResolver=resolve
-		});
-	}
-
-	isResolved() {
-		return this.resolved;
-	}
-}
+import Barrier from "./Barrier.js";
 
 export default class IsoqSsr {
 	constructor(root, req, {localFetch, props, clientPathname}) {
@@ -261,24 +233,7 @@ export default class IsoqSsr {
 	}
 
 	async getResponse() {
-		let u=new URL(this.req.url);
-		if (u.pathname=="/favicon.ico") {
-			var byteString = atob(favicon);
-			var ab = new ArrayBuffer(byteString.length);
-			var ia = new Uint8Array(ab);
-			for (var i = 0; i < byteString.length; i++)
-			    ia[i] = byteString.charCodeAt(i);
-
-			let blob=new Blob([ab]);
-			return new Response(blob,{
-				headers: {
-					"Content-Type": "image/x-icon"
-				}
-			});
-		}
-
 		let content=await this.render();
-
 		if (this.response)
 			return this.response;
 

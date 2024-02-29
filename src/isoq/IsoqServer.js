@@ -2,6 +2,7 @@ import React from "preact/compat";
 import {createElement} from "preact/compat";
 import IsoqSsr from "./IsoqSsr.js";
 import {render as renderToString} from "preact-render-to-string";
+import favicon from "./favicon.js";
 
 export default class IsoqServer {
 	constructor({clientModule, clientSource, clientSourceMap}) {
@@ -34,6 +35,21 @@ export default class IsoqServer {
 			return new Response(this.clientSourceMap,{
 				headers: {
 					"Content-Type": "application/json"
+				}
+			});
+		}
+
+		if (pathname=="/favicon.ico") {
+			var byteString = atob(favicon);
+			var ab = new ArrayBuffer(byteString.length);
+			var ia = new Uint8Array(ab);
+			for (var i = 0; i < byteString.length; i++)
+			    ia[i] = byteString.charCodeAt(i);
+
+			let blob=new Blob([ab]);
+			return new Response(blob,{
+				headers: {
+					"Content-Type": "image/x-icon"
 				}
 			});
 		}

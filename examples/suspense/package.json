@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "isoq src/index.jsx && serve-fetch node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js"
+    "start": "isoq src/index.jsx --out=.target/handler.mjs && serve-fetch .target/handler.mjs"
   },
   "dependencies": {
     "isoq": "link:../..",

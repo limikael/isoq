@@ -1,11 +1,10 @@
 {
-  "name": "cliserver",
+  "name": "buildscript",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "isoq --out=.target/handler.js src/index.jsx && serve-fetch .target/handler.js"
+    "start": "node start.js"
   },
   "dependencies": {
     "isoq": "link:../..",

@@ -1,7 +1,7 @@
-import handleRequest from "__ISOQ_MIDDLEWARE"
+import handleRequest from "./.target/isoq-request-handler.js";
 
 export default {
-	fetch(req) {
-		return handleRequest(req);
+	async fetch(req) {
+		return await handleRequest(req);
 	}
 }
