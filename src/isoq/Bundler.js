@@ -111,15 +111,10 @@ export default class Bundler {
 		);
 
 		this.log("Bundling request handler...");
-		/*fs.writeFileSync(path.join(this.outdir,"package.json"),JSON.stringify({
-			name: "__ISOQ_MIDDLEWARE",
-			type: "module",
-			main: "isoq-request-handler.js"
-		}));*/
-
 		let runtimeOptions={
 			sourcemap: this.sourcemap,
-			sourcemapRoot: path.resolve("node_modules/__ISOQ_MIDDLEWARE")
+			sourcemapFile: path.resolve(this.out)+".map",
+			sourcemapRoot: outdir,
 		};
 
 		fs.writeFileSync(

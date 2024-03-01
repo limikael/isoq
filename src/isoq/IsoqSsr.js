@@ -126,10 +126,7 @@ export default class IsoqSsr {
 		let e=this.error;
 
 		if (globalThis.__ISOQ_OPTIONS.sourcemap) {
-			let mapper=new SourceMapperNode(
-				"node_modules/__ISOQ_MIDDLEWARE/isoq-request-handler.js.map"
-			);
-
+			let mapper=new SourceMapperNode(globalThis.__ISOQ_OPTIONS.sourcemapFile);
 			e=await mapper.transformError(e);
 		}
 
