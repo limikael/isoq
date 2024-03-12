@@ -25,7 +25,7 @@ export function useIsoMemo(fn, deps=[]) {
 
 			catch (e) {
 				console.log("caught error in useIsoMemo");
-				//console.error(e);
+				console.error(e);
 				throwError(e);
 			}
 

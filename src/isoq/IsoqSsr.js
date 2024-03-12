@@ -85,8 +85,8 @@ export default class IsoqSsr {
 			let localFetchResponse=await this.localFetch(req);
 			if (localFetchResponse.status!=200) {
 				console.log("****** local fetch failed");
-				console.log("local fetch request: ",req);
-				console.log("local fetch request: ",localFetchResponse);
+				//console.log("local fetch request: ",req);
+				//console.log("local fetch request: ",localFetchResponse);
 			}
 
 			return localFetchResponse;
