@@ -52,7 +52,7 @@ class IsoSuspenseState extends EventTarget {
 	}
 }
 
-export function IsoSuspense({children, fallback, onComplete, suspend}) {
+export function IsoSuspense({children, fallback, onComplete, suspend, class: className, style}) {
 	let iso=useIsoContext();
 	if (suspend===undefined)
 		suspend=true;
@@ -82,13 +82,15 @@ export function IsoSuspense({children, fallback, onComplete, suspend}) {
 
 	//console.log("do suspend: "+doSuspend);
 
-	let style={};
+	if (!style)
+		style="width: 100%; height: 100%";
+
 	if (doSuspend)
-		style={display: "none"};
+		style+="; display: none";
 
 	return (
 		createElement(IsoSuspenseContext.Provider,{value: isoSuspenseState},
-			createElement("div",{style: style},
+			createElement("div",{style: style, class: className},
 				children
 			)
 		)

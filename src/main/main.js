@@ -9,3 +9,4 @@ export {useIsoId} from "../components/useIsoId.js";
 export {useIsLoading} from "../components/useIsLoading.js";
 export {IsoErrorBoundary, useIsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 export {IsoSuspense} from "../components/IsoSuspense.js";
+export {useRefId} from "../utils/preact-refid.js";

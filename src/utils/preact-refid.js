@@ -43,6 +43,11 @@ function vnodePath(vnode) {
 
 		else
 			key=0;
+
+		if (key<0)
+			console.log("warning: negative key in refid")
+		/*if (key<0)
+			key="asdf";*/
 	}
 
 	let parentPath=vnodePath(vnode.__);
