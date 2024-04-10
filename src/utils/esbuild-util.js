@@ -1,11 +1,40 @@
-import path from "path";
-import {fileURLToPath} from "url";
+import path from "path-browserify";
+//import {fileURLToPath} from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+//const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /*escapeStringRegExp.matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
 function escapeStringRegExp(str) {
     return str.replace(escapeStringRegExp.matchOperatorsRe, '\\$&');
+}*/
+
+/*export function fileContents(filemap) {
+	function escapeNamespace(keys) {
+		return new RegExp(
+	    	`^${keys
+				.map((str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+				.join('|')}$`
+		);
+	}
+
+	const escapedNamespace = escapeNamespace(Object.keys(filemap));
+
+	return {
+		name: "filecontents",
+		setup: (build)=>{
+			console.log("Setting up file contents..");
+			let resolveResults={};
+
+			build.onLoad({filter: escapedNamespace, namespace: "isoq"},async (ev)=>{
+				if (!filemap[ev.path])
+					throw new Error("Can't load: "+ev.path);
+
+				return {
+					contents: filemap[ev.path],
+				}
+			});
+		}
+	}
 }*/
 
 export function moduleAlias(aliases) {
@@ -28,6 +57,11 @@ export function moduleAlias(aliases) {
 				if (!aliases[ev.path])
 					return null;
 
+				if (aliases[ev.path]=="%PASS%") {
+					console.log("passing...");
+					return {path: ev.path, namespace: "isoq"};
+				}
+
 				if (!resolveResults[ev.path]) {
 					let result=await build.resolve(aliases[ev.path],{
 						kind: ev.kind,
@@ -46,7 +80,7 @@ export function moduleAlias(aliases) {
 	}
 }
 
-export function ignorePath(paths) {
+/*export function ignorePath(paths) {
 	if (!paths)
 		paths=[];
 
@@ -75,4 +109,4 @@ export function ignorePath(paths) {
 			});
 		}
 	}
-}
+}*/

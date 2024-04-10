@@ -37,10 +37,6 @@ let yargsConf=yargs(hideBin(process.argv))
         description: "Remove all .js files from contentdir before building. Beware!",
         type: "boolean",
     })
-    /*.option("outdir",{
-        description: "Generate middleware in this directory.",
-        default: "node_modules/__ISOQ_MIDDLEWARE"
-    })*/
     .option("out",{
         description: "Output filename.",
         default: bundlerDefault.out

@@ -31,6 +31,7 @@ class ErrorBoundaryComponent extends Component {
 					window.sourceMap) {
 				this.setState({transformed: true});
 				(async()=>{
+					//console.log("transforming error with sourcemap");
 					let mapper=new SourceMapper();
 					let response=await fetch("/client.js.map",window.location);
 					mapper.map=await response.json();
