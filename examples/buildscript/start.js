@@ -31,7 +31,13 @@ await bundler.bundle();
 
 let handler=(await import("./.target/handler.js")).default;
 
-let server=http.createServer(createNodeRequestListener(handler));
+let server=http.createServer(createNodeRequestListener(async req=>{
+	return await handler(req,{
+		appPathname: "/////////",
+		props: {test: 123}
+	})
+}));
+
 server.listen(3000,()=>{
 	console.log("Serving on 3000")
 });

@@ -14,9 +14,14 @@ import {useIsoMemo, useIsoContext} from "isoq";
 	</>);
 }*/
 
-export default function() {
+export default function({test}) {
+	let iso=useIsoContext();
+
+	console.log("url: "+iso.getAppUrl("/hello"));
+
 	return (<>
 		<h1>Hello</h1>
-		<p>Testing... xyz</p>
+		<p>Testing... xyz {test}</p>
+		<a href={iso.getAppUrl("/hello")}>test</a>
 	</>);
 }

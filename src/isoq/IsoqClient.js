@@ -1,8 +1,11 @@
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
+import urlJoin from "url-join";
 
 export default class IsoqClient {
-	constructor(refs) {
+	constructor({props, refs, appPathname}) {
 		this.refs=refs;
+		this.props=props;
+		this.appPathname=appPathname;
 		this.req=new Request(window.location);
 		this.cookieDispatcher=new EventTarget();
 	}
@@ -21,6 +24,15 @@ export default class IsoqClient {
 
 	getUrl() {
 		return window.location;
+	}
+
+	getAppUrl(pathname) {
+		if (!pathname)
+			pathname="";
+
+		let u=new URL(urlJoin(this.appPathname,pathname),this.getUrl());
+
+		return u.toString();
 	}
 
 	redirect(url) {

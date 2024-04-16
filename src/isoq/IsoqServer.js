@@ -3,6 +3,7 @@ import {createElement} from "preact/compat";
 import IsoqSsr from "./IsoqSsr.js";
 import {render as renderToString} from "preact-render-to-string";
 import favicon from "./favicon.js";
+import {splitPath, jsonEq} from "../utils/js-util.js";
 
 export default class IsoqServer {
 	constructor({clientModule, clientSource, clientSourceMap}) {
@@ -12,7 +13,10 @@ export default class IsoqServer {
 	}
 
 	async handleRequest(req, options={}) {
-		let {localFetch, props, clientPathname}=options;
+		let {localFetch, props, clientPathname, appPathname}=options;
+
+		if (!appPathname)
+			appPathname="/";
 
 		if (!clientPathname)
 			clientPathname="/client.js";
@@ -21,9 +25,15 @@ export default class IsoqServer {
 		if (req.method.toUpperCase()!="GET")
 			return;
 
-		//console.log("GET: "+pathname);
+		let appPathnameParts=splitPath(appPathname);
+		let clientPathnameParts=splitPath(clientPathname);
+		let clientMapPathnameParts=splitPath(clientPathname+".map");
+		let pathnameParts=splitPath(pathname);
+		let prefixParts=pathnameParts.splice(0,appPathnameParts.length);
+		if (!jsonEq(prefixParts,appPathnameParts))
+			return;
 
-		if (pathname==clientPathname && this.clientSource) {
+		if (jsonEq(pathnameParts,clientPathnameParts) && this.clientSource) {
 			return new Response(this.clientSource,{
 				headers: {
 					"Content-Type": "text/javascript"
@@ -31,7 +41,7 @@ export default class IsoqServer {
 			});
 		}
 
-		if (pathname==clientPathname+".map" && this.clientSourceMap) {
+		if (jsonEq(pathnameParts,clientMapPathnameParts) && this.clientSourceMap) {
 			return new Response(this.clientSourceMap,{
 				headers: {
 					"Content-Type": "application/json"
@@ -39,7 +49,7 @@ export default class IsoqServer {
 			});
 		}
 
-		if (pathname=="/favicon.ico") {
+		if (jsonEq(pathnameParts,["favicon.ico"])) {
 			var byteString = atob(favicon);
 			var ab = new ArrayBuffer(byteString.length);
 			var ia = new Uint8Array(ab);
@@ -58,6 +68,7 @@ export default class IsoqServer {
 			localFetch,
 			props,
 			clientPathname,
+			appPathname: "/"+appPathnameParts.join("/")
 		});
 
 		return await ssr.getResponse();

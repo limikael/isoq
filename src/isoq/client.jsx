@@ -5,11 +5,11 @@ import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import DefaultErrorFallback from "./DefaultErrorFallback.js";
 
 if (!window.__isoError) {
-	let isoClient=new IsoqClient(window.__isoRefs);
+	let isoClient=new IsoqClient(window.__iso);
 	let content=(
 		<IsoContext.Provider value={isoClient}>
 			<IsoErrorBoundary fallback={DefaultErrorFallback}>
-				<Browser {...window.__isoProps}/>
+				<Browser {...isoClient.props}/>
 			</IsoErrorBoundary>
 		</IsoContext.Provider>
 	)

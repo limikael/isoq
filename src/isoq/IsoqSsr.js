@@ -6,13 +6,15 @@ import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
 import SourceMapperNode from "isoq/source-mapper-node";
 import Barrier from "./Barrier.js";
+import urlJoin from "url-join";
 
 export default class IsoqSsr {
-	constructor(root, req, {localFetch, props, clientPathname}) {
+	constructor(root, req, {localFetch, props, clientPathname, appPathname}) {
 		this.root=root;
 		this.req=req;
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
+		this.appPathname=appPathname;
 		this.refs={};
 		this.barriers={};
 		this.props=props;
@@ -72,6 +74,15 @@ export default class IsoqSsr {
 
 	getUrl() {
 		return this.req.url;
+	}
+
+	getAppUrl(path) {
+		if (!path)
+			path="";
+
+		let u=new URL(urlJoin(this.appPathname,path),this.getUrl());
+
+		return u.toString();
 	}
 
 	fetch=async (url, options={})=> {
@@ -209,6 +220,12 @@ export default class IsoqSsr {
 				refs[k]={current: this.refs[k].current};
 		}
 
+		let iso={
+			props: props,
+			refs: refs,
+			appPathname: this.appPathname
+		}
+
 		return `<!DOCTYPE html>
 			<html>
 				<head>
@@ -221,9 +238,8 @@ export default class IsoqSsr {
 					<div id="isoq">
 						${renderResult}
 					</div>
-					<script>window.__isoProps=${JSON.stringify(props)}</script>
-					<script>window.__isoRefs=${JSON.stringify(refs)}</script>
-					<script src="${this.clientPathname}" type="module"></script>
+					<script>window.__iso=${JSON.stringify(iso)}</script>
+					<script src="${this.getAppUrl(this.clientPathname)}" type="module"></script>
 				</body>
 			</html>
 		`;
