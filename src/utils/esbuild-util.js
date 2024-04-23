@@ -63,9 +63,10 @@ export function moduleAlias(aliases) {
 				}
 
 				if (!resolveResults[ev.path]) {
+					//console.log("will resolve ",ev);
 					let result=await build.resolve(aliases[ev.path],{
 						kind: ev.kind,
-						resolveDir: "."
+						resolveDir: ev.resolveDir, //"."
 					});
 
 			        if (result.errors.length > 0)

@@ -35,6 +35,8 @@ export default class BrowserBundler {
 	}
 
 	async bundle() {
+		//console.log("******* BUNDLE ******");
+
 		if (await exists(this.fsPromises,this.out))
 			await this.fsPromises.unlink(this.out);
 
