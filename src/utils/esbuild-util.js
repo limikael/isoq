@@ -81,7 +81,7 @@ export function moduleAlias(aliases) {
 	}
 }
 
-/*export function ignorePath(paths) {
+export function ignorePaths(paths) {
 	if (!paths)
 		paths=[];
 
@@ -102,12 +102,19 @@ export function moduleAlias(aliases) {
 
 			build.onResolve({filter: escapedNamespace},async (ev)=>{
 				if (!paths.includes(ev.path))
-					return null;
+					return;
 
 				return {
-					path: path.join(__dirname,"null.js")
+					path: "ignore",
+					namespace: "ignore"
 				}
 			});
+
+			build.onLoad({filter: /.*/, namespace: "ignore"}, async args=>{
+				return {
+					contents: "export default null;"
+				};
+			})
 		}
 	}
-}*/
+}

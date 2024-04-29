@@ -1,5 +1,5 @@
 import bundlerDefault from "../isoq/bundler-default.js";
-import {moduleAlias} from "../utils/esbuild-util.js";
+import {moduleAlias, ignorePaths} from "../utils/esbuild-util.js";
 import {mkdirRecursive, exists, rmRecursive} from "../utils/fs-util.js";
 import path from "path-browserify";
 import {buf2hex} from "../utils/js-util.js";
@@ -8,6 +8,12 @@ export default class BrowserBundler {
 	constructor(inFile, conf) {
 		this.inFile=inFile;
 		Object.assign(this,{...bundlerDefault,...conf});
+
+		if (typeof this.ignore=="string")
+			this.ignore=this.ignore.split(",");
+
+		if (!this.ignore)
+			this.ignore=[];
 
 		if (this.wm || this.outdir)
 			throw new Error("mw and outdir is obsolete...");
@@ -91,6 +97,7 @@ export default class BrowserBundler {
 			minify: this.minify,
 			sourcemap: this.sourcemap,
 			plugins: [
+				ignorePaths(this.ignore),
 				moduleAlias({
 					"@browser": this.inFile,
 					"react": "preact/compat",
@@ -184,6 +191,7 @@ export default class BrowserBundler {
 			sourcemap: this.sourcemap,
 			external: handlerExternal,
 			plugins: [
+				ignorePaths(this.ignore),
 				moduleAlias(handlerAlias),
 				...this.esbuildPlugins,
 			],

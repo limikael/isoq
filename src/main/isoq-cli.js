@@ -33,6 +33,9 @@ let yargsConf=yargs(hideBin(process.argv))
         type: "boolean",
         default: bundlerDefault.sourcemap
     })
+    .option("ignore",{
+        description: "Comma separated string with modules to ignore.",
+    })
     .option("purge-old-js",{
         description: "Remove all .js files from contentdir before building. Beware!",
         type: "boolean",

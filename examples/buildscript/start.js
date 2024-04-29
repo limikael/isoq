@@ -23,6 +23,8 @@ let bundler=new Bundler("index.jsx",{
 	tmpdir: os.tmpdir(),
 	isoqdir: path.resolve(process.cwd(),"node_modules/isoq"),*/
 	out: ".target/handler.js",
+	ignore: "fs,url,path",
+	//minify: false,
 	/*quiet: true,*/
 	//sourcemap: true
 });
