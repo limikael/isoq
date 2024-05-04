@@ -1,8 +1,8 @@
 import path from "path-browserify";
 
-export async function exists(fsPromises, path) {
+export async function exists(path, {fs}) {
 	try {
-		let stat=await fsPromises.stat(path);
+		let stat=await fs.promises.stat(path);
 		//console.log(stat);
 		return true;
 	} 
@@ -15,7 +15,7 @@ export async function exists(fsPromises, path) {
 	}
 }
 
-export async function mkdirRecursive(fsPromises, dir) {	
+export async function mkdirRecursive(dir, {fs}) {	
 	let start="";
 	if (path.isAbsolute(dir))
 		start=path.sep;
@@ -23,9 +23,9 @@ export async function mkdirRecursive(fsPromises, dir) {
 	let parts=dir.split(path.sep);
 	for (let i=0; i<=parts.length; i++) {
 		let p=path.join(start,...parts.slice(0,i));
-		if (!(await exists(fsPromises,p))) {
+		if (!(await exists(p,{fs}))) {
 			try {
-				await fsPromises.mkdir(p);
+				await fs.promises.mkdir(p);
 			}
 
 			catch (e) {
@@ -36,16 +36,16 @@ export async function mkdirRecursive(fsPromises, dir) {
 	}
 }
 
-export async function rmRecursive(fsPromises, target) {
-	let stat=await fsPromises.lstat(target);
+export async function rmRecursive(target, {fs}) {
+	let stat=await fs.promises.lstat(target);
 	if (stat.isDirectory()) {
-		for (let child of await fsPromises.readdir(target))
-			await rmRecursive(fsPromises,path.join(target,child));
+		for (let child of await fs.promises.readdir(target))
+			await rmRecursive(path.join(target,child),{fs});
 
-		await fsPromises.rmdir(target);
+		await fs.promises.rmdir(target);
 	}
 
 	else {
-		await fsPromises.unlink(target);
+		await fs.promises.unlink(target);
 	}
 }

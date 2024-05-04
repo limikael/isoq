@@ -13,7 +13,7 @@ export default class Bundler {
 			...conf,
 			out: path.resolve(conf.out),
 			esbuild: esbuild,
-			fsPromises: fs.promises,
+			fs: fs,
 			tmpdir: os.tmpdir(),
 			isoqdir: path.resolve(__dirname,"../..")
 		};

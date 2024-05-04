@@ -1,7 +1,7 @@
 {
   "name": "isoq",
   "scripts": {},
-  "version": "1.1.10",
+  "version": "1.1.11",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -19,21 +19,13 @@
     "yargs": "^17.7.2"
   },
   "exports": {
-    ".": {
-      "import": "./src/main/main.js"
-    },
+    ".": "./src/main/main.js",
+    "./esbuild-util": "./src/utils/esbuild-util.js",
+    "./preact-shim": "./src/utils/preact-shim.js",
+    "./source-mapper-node": "./src/utils/SourceMapperNode.js",
     "./bundler": {
-      "import": "./src/isoq/Bundler.js"
-    },
-    "./browser-bundler": "./src/isoq/BrowserBundler.js",
-    "./esbuild-util": {
-      "import": "./src/utils/esbuild-util.js"
-    },
-    "./preact-shim": {
-      "import": "./src/utils/preact-shim.js"
-    },
-    "./source-mapper-node": {
-      "import": "./src/utils/SourceMapperNode.js"
+      "node": "./src/isoq/Bundler.js",
+      "browser": "./src/isoq/BrowserBundler.js"
     }
   }
 }

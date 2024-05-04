@@ -18,8 +18,11 @@ export default class BrowserBundler {
 		if (this.wm || this.outdir)
 			throw new Error("mw and outdir is obsolete...");
 
-		if (!this.fsPromises || !this.esbuild)
-			throw new Error("Need fsPromises and esbuild");
+		if (!this.fs)
+			throw new Error("Need fs");
+
+		if (!this.esbuild)
+			throw new Error("Need esbuild");
 
 		if (!this.esbuildPlugins)
 			this.esbuildPlugins=[];
@@ -43,17 +46,17 @@ export default class BrowserBundler {
 	async bundle() {
 		//console.log("******* BUNDLE ******");
 
-		if (await exists(this.fsPromises,this.out))
-			await this.fsPromises.unlink(this.out);
+		if (await exists(this.out,{fs:this.fs}))
+			await this.fs.promises.unlink(this.out);
 
 		let ab=new TextEncoder("utf-8").encode(this.inFile);
 		let inHash=buf2hex(await crypto.subtle.digest("SHA-1",ab));
 		this.tmpOutDir=path.join(this.tmpdir,"isoq-"+inHash);
 
-		if (await exists(this.fsPromises,this.tmpOutDir))
-			await rmRecursive(this.fsPromises,this.tmpOutDir)
+		if (await exists(this.tmpOutDir,{fs:this.fs}))
+			await rmRecursive(this.tmpOutDir,{fs:this.fs})
 
-		await mkdirRecursive(this.fsPromises,this.tmpOutDir);
+		await mkdirRecursive(this.tmpOutDir,{fs:this.fs});
 
 		if (this.splitting && !this.contentdir)
 			throw new Error("Code splitting requires contentdir.");
@@ -63,7 +66,7 @@ export default class BrowserBundler {
 				throw new Error("Content dir is not absolute");
 
 			this.clientOutDir=this.contentdir;
-			await mkdirRecursive(this.fsPromises,this.clientOutDir);
+			await mkdirRecursive(this.clientOutDir,{fs:this.fs});
 		}
 
 		else
@@ -112,7 +115,7 @@ export default class BrowserBundler {
 			throw new Error(result.errors);
 
 		for (let outputFile of result.outputFiles) {
-			await this.fsPromises.writeFile(
+			await this.fs.promises.writeFile(
 				outputFile.path,
 				outputFile.contents
 			)
@@ -132,8 +135,8 @@ export default class BrowserBundler {
 	}
 
 	async sourcify(fn, target) {
-		let source=await this.fsPromises.readFile(fn,"utf8");
-		await this.fsPromises.writeFile(
+		let source=await this.fs.promises.readFile(fn,"utf8");
+		await this.fs.promises.writeFile(
 			target,
 			`export default ${JSON.stringify(source)};`
 		);
@@ -147,7 +150,7 @@ export default class BrowserBundler {
 			sourcemapRoot: this.clientOutDir,
 		};
 
-		await this.fsPromises.writeFile(
+		await this.fs.promises.writeFile(
 			path.join(this.tmpOutDir,"global-options.js"),
 			`globalThis.__ISOQ_OPTIONS=${JSON.stringify(runtimeOptions)}`
 		);
@@ -200,9 +203,9 @@ export default class BrowserBundler {
 		if (result.errors.length)
 			throw new Error(result.errors);
 
-		await mkdirRecursive(this.fsPromises,path.dirname(this.out));
+		await mkdirRecursive(path.dirname(this.out),{fs:this.fs});
 		for (let outputFile of result.outputFiles) {
-			await this.fsPromises.writeFile(
+			await this.fs.promises.writeFile(
 				outputFile.path,
 				outputFile.contents
 			)
