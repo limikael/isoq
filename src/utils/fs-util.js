@@ -49,3 +49,14 @@ export async function rmRecursive(target, {fs}) {
 		await fs.promises.unlink(target);
 	}
 }
+
+export async function findInPath(searchPath, fn, {fs}) {
+	if (await exists(path.join(searchPath,fn),{fs}))
+		return path.join(searchPath,fn);
+
+	let parent=path.dirname(searchPath);
+	if (parent==searchPath)
+		throw new Error("Unable to find: "+fn+" in any parent of: "+searchPath);
+
+	return await findInPath(parent,fn,{fs});
+}

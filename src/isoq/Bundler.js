@@ -24,7 +24,7 @@ export default class Bundler {
 		this.browserBundler=new BrowserBundler(path.resolve(inFile),conf);
 	}
 
-	checkSymLinks() {
+	/*checkSymLinks() {
 		function countSymLinks(fn, cnt) {
 			if (fs.existsSync(fn)) {
 				if (fs.lstatSync(fn).isSymbolicLink())
@@ -41,10 +41,10 @@ export default class Bundler {
 
 		if (linkCount.links && linkCount.nonlinks)
 			throw new Error("One of isoq or preact is symlinked. They should both be, or none.");
-	}
+	}*/
 
 	async bundle() {
-		this.checkSymLinks();
+		//this.checkSymLinks();
 		await this.browserBundler.bundle();
 	}
 }

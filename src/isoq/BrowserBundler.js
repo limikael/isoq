@@ -1,6 +1,6 @@
 import bundlerDefault from "../isoq/bundler-default.js";
 import {moduleAlias, ignorePaths} from "../utils/esbuild-util.js";
-import {mkdirRecursive, exists, rmRecursive} from "../utils/fs-util.js";
+import {mkdirRecursive, exists, rmRecursive, findInPath} from "../utils/fs-util.js";
 import path from "path-browserify";
 import {buf2hex} from "../utils/js-util.js";
 
@@ -32,6 +32,18 @@ export default class BrowserBundler {
 				!path.isAbsolute(inFile) ||
 				!path.isAbsolute(this.out))
 			throw new Error("Need absolute dirs for tmpdir, isoqdir, inFile and out.");
+	}
+
+	async getModuleAliases() {
+		let preactPath=await findInPath(this.isoqdir,"node_modules/preact",{fs: this.fs});
+
+		return {
+			"isoq": path.join(this.isoqdir,"src/main/main.js"),
+			"preact": preactPath,
+			"react": path.join(preactPath,"compat"),
+			"react-dom": path.join(preactPath,"compat"),
+			"react/jsx-runtime": path.join(preactPath,"jsx-runtime")
+		}
 	}
 
 	commonBuildOptions() {
@@ -103,9 +115,7 @@ export default class BrowserBundler {
 				ignorePaths(this.ignore),
 				moduleAlias({
 					"@browser": this.inFile,
-					"react": "preact/compat",
-					"react-dom": "preact/compat",
-					"react/jsx-runtime": "preact/jsx-runtime"
+					...await this.getModuleAliases()
 				}),
 				...this.esbuildPlugins,
 			],
@@ -158,9 +168,7 @@ export default class BrowserBundler {
 		let handlerExternal=["source-map","fs","path","url"];
 		let handlerAlias={
 			"@browser": this.inFile,
-			"react": "preact/compat",
-			"react-dom": "preact/compat",
-			"react/jsx-runtime": "preact/jsx-runtime",
+			...await this.getModuleAliases()
 		};
 
 		if (this.contentdir)
