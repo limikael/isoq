@@ -32,6 +32,9 @@ export default class BrowserBundler {
 				!path.isAbsolute(inFile) ||
 				!path.isAbsolute(this.out))
 			throw new Error("Need absolute dirs for tmpdir, isoqdir, inFile and out.");
+
+		//console.log("*************************************");
+		//this.minify=false;
 	}
 
 	async getModuleAliases() {
