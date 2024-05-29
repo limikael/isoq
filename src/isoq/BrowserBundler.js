@@ -33,19 +33,34 @@ export default class BrowserBundler {
 				!path.isAbsolute(this.out))
 			throw new Error("Need absolute dirs for tmpdir, isoqdir, inFile and out.");
 
-		//console.log("*************************************");
+		//console.log("*********************");
 		//this.minify=false;
 	}
 
 	async getModuleAliases() {
 		let preactPath=await findInPath(this.isoqdir,"node_modules/preact",{fs: this.fs});
+		//console.log("preact path: "+preactPath);
 
 		return {
 			"isoq": path.join(this.isoqdir,"src/main/main.js"),
-			"preact": preactPath,
+
+			"preact": path.join(preactPath,"dist/preact.module.js"),
+			"preact/hooks": path.join(preactPath,"hooks/dist/hooks.module.js"),
+			"react": path.join(preactPath,"compat/dist/compat.module.js"),
+			"react-dom": path.join(preactPath,"compat/dist/compat.module.js"),
+			"react/jsx-runtime": path.join(preactPath,"jsx-runtime/dist/jsxRuntime.module.js"),
+
+			// doesn't work when build is running in browser
+			/*"preact": preactPath,
+			"preact/hooks": path.join(preactPath,"hooks"),
 			"react": path.join(preactPath,"compat"),
 			"react-dom": path.join(preactPath,"compat"),
-			"react/jsx-runtime": path.join(preactPath,"jsx-runtime")
+			"react/jsx-runtime": path.join(preactPath,"jsx-runtime")*/
+
+			// old
+			/*"react": "preact/compat",
+			"react-dom": "preact/compat",
+			"react/jsx-runtime": "preact/jsx-runtime"*/
 		}
 	}
 
