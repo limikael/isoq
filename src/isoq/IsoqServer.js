@@ -36,7 +36,8 @@ export default class IsoqServer {
 		if (jsonEq(pathnameParts,clientPathnameParts) && this.clientSource) {
 			return new Response(this.clientSource,{
 				headers: {
-					"Content-Type": "text/javascript"
+					"Content-Type": "text/javascript",
+					"Access-Control-Allow-Origin": "*"
 				}
 			});
 		}
