@@ -47,6 +47,10 @@ let yargsConf=yargs(hideBin(process.argv))
     .options("quiet",{
         description: "Suppress output.",
     })
+    .option("expose-exports",{
+        description: "Re-export symbols from the main module in the generated bundle, both on server and client. On the server, also export react and renderToString.",
+        type: "boolean",
+    })
     .strictOptions()
     .usage("isoq -- Isomorphic javascript middleware generator.")
 

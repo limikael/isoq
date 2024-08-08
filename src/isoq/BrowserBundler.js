@@ -106,7 +106,8 @@ export default class BrowserBundler {
 		await this.bundleHandler();
 
 		this.log("Middleware "+
-			(this.sourcemap?"with sourcemap":"without sourcemap")+
+			(this.sourcemap?"with sourcemap, ":"without sourcemap, ")+
+			(this.exposeExports?"with exposed exports":"without exposed exports")+
 			" generated in: "+this.out
 		);
 
@@ -120,9 +121,13 @@ export default class BrowserBundler {
 	async bundleClient() {
 		this.log("Bundling client...");
 
+		let entryPoints=[path.join(this.isoqdir,"src/isoq/client.jsx")];
+		if (this.exposeExports)
+			entryPoints=[path.join(this.isoqdir,"src/expose/client.jsx")];
+
 		let result=await this.esbuild.build({
 			...this.commonBuildOptions(),
-			entryPoints: [path.join(this.isoqdir,"src/isoq/client.jsx")],
+			entryPoints: entryPoints,
 			outdir: this.clientOutDir,
 			bundle: true,
 			write: false,
@@ -206,9 +211,13 @@ export default class BrowserBundler {
 			handlerAlias["isoq/source-mapper-node"]=path.join(this.isoqdir,"src/utils/null.js");
 		}
 
+		let entryPoints=[path.join(this.isoqdir,"src/isoq/isoq-request-handler.js")];
+		if (this.exposeExports)
+			entryPoints=[path.join(this.isoqdir,"src/expose/isoq-request-handler.js")];
+
 		let result=await this.esbuild.build({
 			...this.commonBuildOptions(),
-			entryPoints: [path.join(this.isoqdir,"src/isoq/isoq-request-handler.js")],
+			entryPoints: entryPoints,
 			inject: [
 				...this.commonBuildOptions().inject,
 				path.join(this.tmpOutDir,"global-options.js")

@@ -1,5 +1,4 @@
 import Browser from "@browser";
-export * from "@browser";
 import IsoqClient from "./IsoqClient.js";
 import IsoContext from "./IsoContext.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
