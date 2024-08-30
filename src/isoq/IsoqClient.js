@@ -8,9 +8,13 @@ export default class IsoqClient {
 		this.appPathname=appPathname;
 		this.req=new Request(window.location);
 		this.cookieDispatcher=new EventTarget();
+		this.undefRefs=[];
 	}
 
 	getIsoRef(id) {
+		if (this.hydration && !this.refs.hasOwnProperty(id))
+			this.undefRefs.push(id);
+
 		return this.refs[id];
 	}
 

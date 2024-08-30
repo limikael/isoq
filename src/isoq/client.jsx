@@ -13,10 +13,19 @@ if (!window.__isoError && window.__iso) {
 			</IsoErrorBoundary>
 		</IsoContext.Provider>
 	)
+	isoClient.hydration=true;
 	hydrate(content,document.getElementById("isoq"));
-	if (Object.keys(isoClient.refs).length)
+	isoClient.hydration=false;
+	if (isoClient.undefRefs.length) {
 		console.log(
-			"Warning, unused refs after hydration: ",
+			"** Warning, undefined refs:",
+			isoClient.undefRefs
+		);
+	}
+	if (Object.keys(isoClient.refs).length) {
+		console.log(
+			"** Warning, unused refs: ",
 			Object.keys(isoClient.refs)
 		);
+	}
 }

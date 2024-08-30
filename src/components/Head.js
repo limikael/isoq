@@ -1,4 +1,5 @@
 import {useIsoContext} from "../isoq/IsoContext.js";
+import {createElement, Fragment} from "react";
 
 export function Head({children}) {
 	let isoContext=useIsoContext();
@@ -6,7 +7,7 @@ export function Head({children}) {
 	if (isoContext.isSsr())
 		isoContext.headChildren.push(children);
 
-	return "";
+	return createElement(Fragment);
 }
 
 export default Head;
