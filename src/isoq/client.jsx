@@ -1,8 +1,10 @@
 import Browser from "@browser";
-import IsoqClient from "./IsoqClient.js";
+import {IsoqClient, IsoContext, IsoErrorBoundary, DefaultErrorFallback} from "isoq/client-internals";
+
+/*import IsoqClient from "./IsoqClient.js";
 import IsoContext from "./IsoContext.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
-import DefaultErrorFallback from "./DefaultErrorFallback.js";
+import DefaultErrorFallback from "./DefaultErrorFallback.js";*/
 
 if (!window.__isoError && window.__iso) {
 	let isoClient=new IsoqClient(window.__iso);

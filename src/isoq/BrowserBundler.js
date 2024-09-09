@@ -27,6 +27,9 @@ export default class BrowserBundler {
 		if (!this.esbuildPlugins)
 			this.esbuildPlugins=[];
 
+		if (this.pathAliases===undefined)
+			this.pathAliases=true;
+
 		if (!path.isAbsolute(this.tmpdir) ||
 				!path.isAbsolute(this.isoqdir) ||
 				!path.isAbsolute(inFile) ||
@@ -38,6 +41,9 @@ export default class BrowserBundler {
 	}
 
 	async getModuleAliases() {
+		if (!this.pathAliases)
+			return {};
+
 		let preactPath=await findInPath(this.isoqdir,"node_modules/preact",{fs: this.fs});
 		//console.log("preact path: "+preactPath);
 
@@ -74,7 +80,7 @@ export default class BrowserBundler {
 	}
 
 	async bundle() {
-		//console.log("******* BUNDLE ******");
+		console.log("**** BUNDLE: "+this.inFile);
 
 		if (await exists(this.out,{fs:this.fs}))
 			await this.fs.promises.unlink(this.out);

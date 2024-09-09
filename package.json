@@ -23,6 +23,8 @@
     "./esbuild-util": "./src/utils/esbuild-util.js",
     "./preact-shim": "./src/utils/preact-shim.js",
     "./source-mapper-node": "./src/utils/SourceMapperNode.js",
+    "./client-internals": "./src/isoq/client-internals.js",
+    "./server-internals": "./src/isoq/server-internals.js",
     "./bundler": {
       "node": "./src/isoq/Bundler.js",
       "browser": "./src/isoq/BrowserBundler.js"
