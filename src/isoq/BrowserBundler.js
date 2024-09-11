@@ -80,7 +80,7 @@ export default class BrowserBundler {
 	}
 
 	async bundle() {
-		console.log("**** BUNDLE: "+this.inFile);
+		//console.log("**** BUNDLE: "+this.inFile);
 
 		if (await exists(this.out,{fs:this.fs}))
 			await this.fs.promises.unlink(this.out);

@@ -2,11 +2,12 @@ import {parseCookie, stringifyCookie} from "../utils/js-util.js";
 import urlJoin from "url-join";
 
 export default class IsoqClient {
-	constructor({props, refs, appPathname}) {
+	constructor({props, refs, appPathname, window}) {
+		this.window=window;
 		this.refs=refs;
 		this.props=props;
 		this.appPathname=appPathname;
-		this.req=new Request(window.location);
+		this.req=new Request(this.window.location);
 		this.cookieDispatcher=new EventTarget();
 		this.undefRefs=[];
 	}
@@ -27,7 +28,7 @@ export default class IsoqClient {
 	}
 
 	getUrl() {
-		return window.location;
+		return this.window.location;
 	}
 
 	getAppUrl(pathname) {
@@ -39,15 +40,19 @@ export default class IsoqClient {
 		return u.toString();
 	}
 
+	getWindow() {
+		return this.window;
+	}
+
 	redirect(url) {
-		window.location=url;
+		this.window.location=url;
 	}
 
 	fetch=async (url,options={})=>{
 		if (url.startsWith("/"))
 			url=new URL(this.req.url).origin+url;
 
-		return await fetch(url,options);
+		return await this.window.fetch(url,options);
 	}
 
 	getBarrier(id) {
@@ -58,7 +63,7 @@ export default class IsoqClient {
 	}
 
 	getCookie(key) {
-		let parsedCookie=parseCookie(window.document.cookie);
+		let parsedCookie=parseCookie(this.window.document.cookie);
 		return parsedCookie[key];
 	}
 

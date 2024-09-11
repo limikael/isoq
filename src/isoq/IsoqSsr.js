@@ -277,4 +277,7 @@ export default class IsoqSsr {
 		this.cookies[key]={value, modified: true, ...options};
 		this.cookieDispatcher.dispatchEvent(new Event(key));
 	}
+
+	getWindow() {
+	}
 }
