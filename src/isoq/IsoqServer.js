@@ -18,8 +18,13 @@ export default class IsoqServer {
 		if (!appPathname)
 			appPathname="/";
 
-		if (!clientPathname)
-			clientPathname="/client.js";
+		if (!clientPathname) {
+			if (this.clientSource)
+				clientPathname="/bundled-client.js";
+
+			else
+				clientPathname="/client.js";
+		}
 
 		let pathname=new URL(req.url).pathname;
 		if (req.method.toUpperCase()!="GET")
