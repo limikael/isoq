@@ -227,15 +227,15 @@ export default class IsoqSsr {
 		}
 
 		return `<!DOCTYPE html>
-			<html>
+			<html style="height: 100%">
 				<head>
 					${sourceMapScripts}
 					<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 					<meta charset="utf-8"/>
 					${head}
 				</head>
-				<body style="margin: 0">
-					<div id="isoq">
+				<body style="margin: 0; height: 100%">
+					<div id="isoq" style="height: 100%">
 						${renderResult}
 					</div>
 					<script>window.__iso=${JSON.stringify(iso)}</script>
