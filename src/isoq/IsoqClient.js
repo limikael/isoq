@@ -7,7 +7,10 @@ export default class IsoqClient {
 		this.refs=refs;
 		this.props=props;
 		this.appPathname=appPathname;
-		this.req=new Request(this.window.location);
+
+		if (window.Request)
+			this.req=new Request(this.window.location);
+
 		this.cookieDispatcher=new EventTarget();
 		this.undefRefs=[];
 	}

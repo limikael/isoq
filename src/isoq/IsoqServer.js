@@ -6,10 +6,11 @@ import favicon from "./favicon.js";
 import {splitPath, jsonEq} from "../utils/js-util.js";
 
 export default class IsoqServer {
-	constructor({clientModule, clientSource, clientSourceMap}) {
+	constructor({clientModule, clientSource, clientSourceMap, wrappers}) {
 		this.clientModule=clientModule;
 		this.clientSource=clientSource;
 		this.clientSourceMap=clientSourceMap;
+		this.wrappers=wrappers;
 	}
 
 	async handleRequest(req, options={}) {
@@ -70,7 +71,11 @@ export default class IsoqServer {
 			});
 		}
 
-		let ssr=new IsoqSsr(this.clientModule,req,{
+		let ssr=new IsoqSsr({
+			clientModule: this.clientModule,
+			clientSource: this.clientSource,
+			wrappers: this.wrappers,
+			req: req,
 			localFetch,
 			props,
 			clientPathname,

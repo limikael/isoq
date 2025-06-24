@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "isoq --out=.target/handler.js src/index.jsx && serve-fetch .target/handler.js"
+    "start": "isoq --out=.target/handler.js src/index.jsx --wrappers=src/wrapper.jsx && serve-fetch .target/handler.js"
   },
   "dependencies": {
     "isoq": "link:../..",

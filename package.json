@@ -1,6 +1,8 @@
 {
   "name": "isoq",
-  "scripts": {},
+  "scripts": {
+    "test": "jasmine"
+  },
   "version": "1.1.23",
   "license": "MIT",
   "type": "module",
@@ -29,5 +31,10 @@
       "node": "./src/isoq/Bundler.js",
       "browser": "./src/isoq/BrowserBundler.js"
     }
+  },
+  "devDependencies": {
+    "jasmine": "^5.8.0",
+    "jsdom": "^26.1.0",
+    "serve-fetch": "^1.0.4"
   }
 }

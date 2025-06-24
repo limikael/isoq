@@ -37,6 +37,60 @@ function escapeStringRegExp(str) {
 	}
 }*/
 
+export function esbuildFileContents(filemap, {namespace, resolveDir}={}) {
+	if (!namespace)
+		namespace="filecontent";
+
+	function escapeNamespace(keys) {
+		return new RegExp(
+	    	`^${keys
+				.map((str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+				.join('|')}$`
+		);
+	}
+
+	const escapedNamespace = escapeNamespace(Object.keys(filemap));
+
+	return {
+		name: "filecontents",
+		setup: (build)=>{
+			//console.log("Setting up file contents..");
+			//let resolveResults={};
+
+			build.onLoad({filter: /.*/, namespace: namespace},async (ev)=>{
+				//console.log("* fc: "+ev.path);
+
+				if (!filemap[ev.path]) {
+					console.log("not found, keys="+JSON.stringify(Object.keys(filemap)));
+					throw new Error("Can't load: "+ev.path);
+				}
+
+				if (typeof filemap[ev.path]=="string") {
+					//console.log("returning ",filemap[ev.path]);
+					//console.log(ev);
+					return {
+						contents: filemap[ev.path],
+						resolveDir: resolveDir
+					}
+				}
+
+				return filemap[ev.path];
+			});
+
+			build.onResolve({filter: escapedNamespace},async (ev)=>{
+				if (!filemap[ev.path]) {
+					//console.log("bad filecontents resolve hit: "+ev.path);
+					return;
+				}
+
+				//console.log("fc: "+ev.path);
+
+				return {path: ev.path, namespace: namespace}
+			});
+		}
+	}
+}
+
 export function moduleAlias(aliases) {
 	function escapeNamespace(keys) {
 		return new RegExp(

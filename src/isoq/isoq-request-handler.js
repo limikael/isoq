@@ -1,13 +1,14 @@
-//import IsoqServer from "../isoq/IsoqServer.js";
 import {IsoqServer} from "isoq/server-internals";
 import Browser from "@browser";
+import wrappers from "@wrappers";
 import clientSource from "@clientSource";
 import clientSourceMap from "@clientSourceMap";
 
 let server=new IsoqServer({
 	clientSource: clientSource,
 	clientModule: Browser,
-	clientSourceMap: clientSourceMap
+	clientSourceMap: clientSourceMap,
+	wrappers: wrappers
 });
 
 export async function handleRequest(req, options) {

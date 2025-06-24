@@ -9,8 +9,9 @@ import Barrier from "./Barrier.js";
 import urlJoin from "url-join";
 
 export default class IsoqSsr {
-	constructor(root, req, {localFetch, props, clientPathname, appPathname}) {
-		this.root=root;
+	constructor({clientModule, clientSource, req, localFetch, props, clientPathname, appPathname, wrappers}) {
+		this.clientModule=clientModule;
+		this.clientSource=clientSource;
 		this.req=req;
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
@@ -18,6 +19,7 @@ export default class IsoqSsr {
 		this.refs={};
 		this.barriers={};
 		this.props=props;
+		this.wrappers=wrappers;
 
 		this.cookies={};
 		let parsedCookies=parseCookie(req.headers.get("cookie"));
@@ -166,11 +168,17 @@ export default class IsoqSsr {
 			props={};
 
 		//console.log("rendering with props: ",props);
+		//console.log(this.wrappers);
+
+		let element=createElement(this.clientModule,props);
+
+		for (let w of [...this.wrappers].reverse())
+			element=createElement(w,props,element);
 
 		this.element=
 			createElement(IsoContext.Provider,{value: this},
 				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
-					createElement(this.root,props)
+					element
 				)
 			);
 
@@ -226,6 +234,14 @@ export default class IsoqSsr {
 			appPathname: this.appPathname
 		}
 
+		// FIX FIX FIX!!!
+
+		//console.log("serving, inlineBundle="+globalThis.__ISOQ_OPTIONS.inlineBundle);
+
+		let scriptTag=`<script src="${this.getAppUrl(this.clientPathname)}" type="module"></script>`;
+		if (globalThis.__ISOQ_OPTIONS.inlineBundle)
+			scriptTag=`<script>${this.clientSource}</script>`;
+
 		return `<!DOCTYPE html>
 			<html style="height: 100%">
 				<head>
@@ -235,11 +251,11 @@ export default class IsoqSsr {
 					${head}
 				</head>
 				<body style="margin: 0; height: 100%">
-					<div id="isoq" style="height: 100%">
+					<div id="isoq" style="display: contents">
 						${renderResult}
 					</div>
 					<script>window.__iso=${JSON.stringify(iso)}</script>
-					<script src="${this.getAppUrl(this.clientPathname)}" type="module"></script>
+					${scriptTag}
 				</body>
 			</html>
 		`;

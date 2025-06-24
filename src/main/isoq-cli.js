@@ -16,6 +16,9 @@ let yargsConf=yargs(hideBin(process.argv))
     .positional("entry point",{
         description: "Source file (required).",
     })
+    .option("wrappers",{
+        description: "Comma separated list of wrappers.",
+    })
     .option("contentdir",{
         description: "Generate content in this directory. Will require your own middleware to serve the content.",
     })
@@ -51,6 +54,10 @@ let yargsConf=yargs(hideBin(process.argv))
         description: "Re-export symbols from the main module in the generated bundle, both on server and client. On the server, also export react and renderToString.",
         type: "boolean",
     })
+    .option("inline-bundle",{
+        description: "Inline the bundle in the script tag rather than loading it.",
+        type: "boolean",
+    })
     .strictOptions()
     .usage("isoq -- Isomorphic javascript middleware generator.")
 
@@ -61,6 +68,12 @@ if (options._.length!=1) {
 	process.exit();
 }
 
-let bundler=new Bundler(options._[0],options);
+if (options.wrappers)
+    options.wrappers=options.wrappers.split(",");
+
+else
+    options.wrappers=[];
+
+let bundler=new Bundler({entrypoint: options._[0], ...options});
 
 await bundler.bundle();

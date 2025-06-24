@@ -8,9 +8,10 @@ import os from "os";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default class Bundler {
-	constructor(inFile, conf={}) {
+	constructor(conf={}) {
 		conf={
 			...conf,
+			entrypoint: path.resolve(conf.entrypoint),
 			out: path.resolve(conf.out),
 			esbuild: esbuild,
 			fs: fs,
@@ -21,7 +22,12 @@ export default class Bundler {
 		if (conf.contentdir)
 			conf.contentdir=path.resolve(conf.contentdir);
 
-		this.browserBundler=new BrowserBundler(path.resolve(inFile),conf);
+		if (!conf.wrappers)
+			conf.wrappers=[];
+
+		conf.wrappers=conf.wrappers.map(w=>path.resolve(w));
+
+		this.browserBundler=new BrowserBundler(conf);
 	}
 
 	/*checkSymLinks() {

@@ -1,12 +1,11 @@
 import bundlerDefault from "../isoq/bundler-default.js";
-import {moduleAlias, ignorePaths} from "../utils/esbuild-util.js";
+import {moduleAlias, ignorePaths, esbuildFileContents} from "../utils/esbuild-util.js";
 import {mkdirRecursive, exists, rmRecursive, findInPath} from "../utils/fs-util.js";
 import path from "path-browserify";
 import {buf2hex} from "../utils/js-util.js";
 
 export default class BrowserBundler {
-	constructor(inFile, conf) {
-		this.inFile=inFile;
+	constructor(conf) {
 		Object.assign(this,{...bundlerDefault,...conf});
 
 		if (typeof this.ignore=="string")
@@ -32,12 +31,26 @@ export default class BrowserBundler {
 
 		if (!path.isAbsolute(this.tmpdir) ||
 				!path.isAbsolute(this.isoqdir) ||
-				!path.isAbsolute(inFile) ||
+				!path.isAbsolute(this.entrypoint) ||
 				!path.isAbsolute(this.out))
-			throw new Error("Need absolute dirs for tmpdir, isoqdir, inFile and out.");
+			throw new Error("Need absolute dirs for tmpdir, isoqdir, entrypoint and out.");
 
-		//console.log("*********************");
-		//this.minify=false;
+		for (let w of this.wrappers)
+			if (!path.isAbsolute(w))
+				throw new Error("Need absolute dirs for wrappers.");
+	}
+
+	getWrappersSource() {
+		let s="";
+
+		for (let i=0; i<this.wrappers.length; i++)
+			s+=`import __Wrapper${i} from ${JSON.stringify(this.wrappers[i])};\n`;
+
+		s+=`export default [${this.wrappers.map((_,i)=>"__Wrapper"+i).join(",")}];\n`;
+
+		//console.log(s);
+
+		return s;
 	}
 
 	async getModuleAliases() {
@@ -80,12 +93,10 @@ export default class BrowserBundler {
 	}
 
 	async bundle() {
-		//console.log("**** BUNDLE: "+this.inFile);
-
 		if (await exists(this.out,{fs:this.fs}))
 			await this.fs.promises.unlink(this.out);
 
-		let ab=new TextEncoder("utf-8").encode(this.inFile);
+		let ab=new TextEncoder("utf-8").encode(this.entrypoint);
 		let inHash=buf2hex(await crypto.subtle.digest("SHA-1",ab));
 		this.tmpOutDir=path.join(this.tmpdir,"isoq-"+inHash);
 
@@ -142,8 +153,9 @@ export default class BrowserBundler {
 			sourcemap: this.sourcemap,
 			plugins: [
 				ignorePaths(this.ignore),
+				esbuildFileContents({"@wrappers": this.getWrappersSource()},{resolveDir: path.dirname(this.out)}),
 				moduleAlias({
-					"@browser": this.inFile,
+					"@browser": this.entrypoint,
 					...await this.getModuleAliases()
 				}),
 				...this.esbuildPlugins,
@@ -187,6 +199,7 @@ export default class BrowserBundler {
 			sourcemap: this.sourcemap,
 			sourcemapFile: this.out+".map",
 			sourcemapRoot: this.clientOutDir,
+			inlineBundle: this.inlineBundle
 		};
 
 		await this.fs.promises.writeFile(
@@ -196,7 +209,7 @@ export default class BrowserBundler {
 
 		let handlerExternal=["source-map","fs","path","url"];
 		let handlerAlias={
-			"@browser": this.inFile,
+			"@browser": this.entrypoint,
 			...await this.getModuleAliases()
 		};
 
@@ -236,6 +249,7 @@ export default class BrowserBundler {
 			external: handlerExternal,
 			plugins: [
 				ignorePaths(this.ignore),
+				esbuildFileContents({"@wrappers": this.getWrappersSource()},{resolveDir: path.dirname(this.out)}),
 				moduleAlias(handlerAlias),
 				...this.esbuildPlugins,
 			],
