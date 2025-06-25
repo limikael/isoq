@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import Bundler from "../isoq/Bundler.js";
+import {isoqBundle} from "../isoq/Bundler.js";
 import yargs from "yargs/yargs";
 import {hideBin} from "yargs/helpers";
 import path from 'path';
@@ -74,6 +74,11 @@ if (options.wrappers)
 else
     options.wrappers=[];
 
-let bundler=new Bundler({entrypoint: options._[0], ...options});
+await isoqBundle({
+    entrypoint: options._[0],
+    ...options
+});
 
-await bundler.bundle();
+/*let bundler=new Bundler({entrypoint: options._[0], ...options});
+
+await bundler.bundle();*/

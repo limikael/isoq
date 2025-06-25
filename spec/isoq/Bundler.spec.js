@@ -1,4 +1,4 @@
-import Bundler from "../../src/isoq/Bundler.js";
+import {isoqBundle} from "../../src/isoq/Bundler.js";
 import path from "node:path";
 import {fileURLToPath} from 'url';
 import fs, {promises as fsp} from "fs";
@@ -21,14 +21,12 @@ describe("Bundler",()=>{
 			}
 		`);
 
-		let bundler=new Bundler({
+		await isoqBundle({
 			entrypoint: path.join(projectDir,"index.jsx"),
 			out: path.join(projectDir,"request-handler.js"),
 			inlineBundle: true,
 			quiet: true
 		});
-
-		await bundler.bundle();
 
 		let handler=(await import(path.join(projectDir,"request-handler.js"))).default;
 
@@ -76,15 +74,13 @@ describe("Bundler",()=>{
 			}
 		`);
 
-		let bundler=new Bundler({
+		await isoqBundle({
 			entrypoint: path.join(projectDir,"index.jsx"),
 			wrappers: [path.join(projectDir,"Wrapper1.jsx"),path.join(projectDir,"Wrapper2.jsx")],
 			out: path.join(projectDir,"request-handler.js"),
 			inlineBundle: true,
 			quiet: true
 		});
-
-		await bundler.bundle();
 
 		let handler=(await import(path.join(projectDir,"request-handler.js"))).default;
 

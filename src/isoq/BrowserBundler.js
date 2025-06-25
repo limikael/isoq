@@ -4,7 +4,7 @@ import {mkdirRecursive, exists, rmRecursive, findInPath} from "../utils/fs-util.
 import path from "path-browserify";
 import {buf2hex} from "../utils/js-util.js";
 
-export default class BrowserBundler {
+export class BrowserBundler {
 	constructor(conf) {
 		Object.assign(this,{...bundlerDefault,...conf});
 
@@ -271,4 +271,9 @@ export default class BrowserBundler {
 		if (!this.quiet)
 			console.log(...args);
 	}
+}
+
+export async function isoqBundle(conf) {
+	let bundler=new BrowserBundler(conf);
+	await bundler.bundle();
 }
