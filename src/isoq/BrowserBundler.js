@@ -1,5 +1,5 @@
 import bundlerDefault from "../isoq/bundler-default.js";
-import {moduleAlias, ignorePaths, esbuildFileContents} from "../utils/esbuild-util.js";
+import {esbuildModuleAlias, esbuildIgnorePaths, esbuildFileContents} from "../utils/esbuild-util.js";
 import {mkdirRecursive, exists, rmRecursive, findInPath} from "../utils/fs-util.js";
 import path from "path-browserify";
 import {buf2hex} from "../utils/js-util.js";
@@ -48,8 +48,6 @@ export class BrowserBundler {
 
 		s+=`export default [${this.wrappers.map((_,i)=>"__Wrapper"+i).join(",")}];\n`;
 
-		//console.log(s);
-
 		return s;
 	}
 
@@ -65,6 +63,7 @@ export class BrowserBundler {
 
 			"preact": path.join(preactPath,"dist/preact.module.js"),
 			"preact/hooks": path.join(preactPath,"hooks/dist/hooks.module.js"),
+			"preact/jsx-runtime": path.join(preactPath,"jsx-runtime/dist/jsxRuntime.module.js"),
 			"react": path.join(preactPath,"compat/dist/compat.module.js"),
 			"react-dom": path.join(preactPath,"compat/dist/compat.module.js"),
 			"react/jsx-runtime": path.join(preactPath,"jsx-runtime/dist/jsxRuntime.module.js"),
@@ -96,6 +95,9 @@ export class BrowserBundler {
 	}
 
 	async bundle() {
+		if (!await exists(path.dirname(this.out),{fs:this.fs}))
+			await this.fs.promises.mkdir(path.dirname(this.out),{recursive: true});
+
 		if (await exists(this.out,{fs:this.fs}))
 			await this.fs.promises.unlink(this.out);
 
@@ -155,9 +157,9 @@ export class BrowserBundler {
 			minify: this.minify,
 			sourcemap: this.sourcemap,
 			plugins: [
-				ignorePaths(this.ignore),
+				esbuildIgnorePaths(this.ignore),
 				esbuildFileContents({"@wrappers": this.getWrappersSource()},{resolveDir: path.dirname(this.out)}),
-				moduleAlias({
+				esbuildModuleAlias({
 					"@browser": this.entrypoint,
 					...await this.getModuleAliases()
 				}),
@@ -251,9 +253,9 @@ export class BrowserBundler {
 			sourcemap: this.sourcemap,
 			external: handlerExternal,
 			plugins: [
-				ignorePaths(this.ignore),
+				esbuildIgnorePaths(this.ignore),
 				esbuildFileContents({"@wrappers": this.getWrappersSource()},{resolveDir: path.dirname(this.out)}),
-				moduleAlias(handlerAlias),
+				esbuildModuleAlias(handlerAlias),
 				...this.esbuildPlugins,
 			],
 		});
