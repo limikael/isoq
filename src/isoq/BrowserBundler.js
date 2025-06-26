@@ -85,10 +85,13 @@ export class BrowserBundler {
 
 	commonBuildOptions() {
 		return {
-			jsxFactory: "h",
-			jsxFragment: "Fragment",
-			inject: [path.join(this.isoqdir,"src/utils/preact-shim.js")],
+//			jsxFactory: "h",
+//			jsxFragment: "Fragment",
+//			inject: [path.join(this.isoqdir,"src/utils/preact-shim.js")],
+			inject: [],
 			format: "esm",
+			jsx: 'automatic',
+			jsxImportSource: 'preact',
 		};
 	}
 

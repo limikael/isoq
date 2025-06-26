@@ -1,6 +1,7 @@
 import wrappers from "@wrappers";
 import Browser from "@browser";
 import {IsoqClient, IsoContext, IsoErrorBoundary, DefaultErrorFallback} from "isoq/client-internals";
+import {hydrate} from "preact";
 
 if (!window.__isoError && window.__iso) {
 	let isoClient=new IsoqClient({...window.__iso, window: window});
