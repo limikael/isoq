@@ -2,7 +2,8 @@ import fs from "fs";
 import path from "path";
 import esbuild from "esbuild";
 import {fileURLToPath} from "url";
-import {isoqBundle as isoqBundleBrowser} from "./BrowserBundler.js";
+import {isoqBundle as isoqBundleBrowser,
+		isoqGetEsbuildOptions as isoqGetEsbuildOptionsBrowser} from "./BrowserBundler.js";
 import os from "os";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,4 +28,12 @@ export async function isoqBundle(conf) {
 	conf.wrappers=conf.wrappers.map(w=>path.resolve(w));
 
 	await isoqBundleBrowser(conf);
+}
+
+export async function isoqGetEsbuildOptions(conf={}) {
+	return isoqGetEsbuildOptionsBrowser({
+		fs: fs,
+		isoqdir: path.resolve(__dirname,"../.."),
+		...conf
+	});
 }

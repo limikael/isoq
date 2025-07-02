@@ -153,6 +153,7 @@ export class BrowserBundler {
 			outdir: this.clientOutDir,
 			bundle: true,
 			write: false,
+			chunkNames: "client.[hash]",
 			splitting: this.splitting,
 			minify: this.minify,
 			sourcemap: this.sourcemap,
@@ -281,4 +282,25 @@ export class BrowserBundler {
 export async function isoqBundle(conf) {
 	let bundler=new BrowserBundler(conf);
 	await bundler.bundle();
+}
+
+export async function isoqGetEsbuildOptions(conf) {
+	let preactPath=await findInPath(conf.isoqdir,"node_modules/preact",{fs: conf.fs});
+	return ({
+		format: "esm",
+		jsx: 'automatic',
+		jsxImportSource: 'preact',
+		plugins: [
+			esbuildModuleAlias({
+				"preact": path.join(preactPath,"dist/preact.module.js"),
+				"preact": path.join(preactPath,"dist/preact.module.js"),
+				"preact/hooks": path.join(preactPath,"hooks/dist/hooks.module.js"),
+				"preact/jsx-runtime": path.join(preactPath,"jsx-runtime/dist/jsxRuntime.module.js"),
+				"react": path.join(preactPath,"compat/dist/compat.module.js"),
+				"react-dom": path.join(preactPath,"compat/dist/compat.module.js"),
+				"react/jsx-runtime": path.join(preactPath,"jsx-runtime/dist/jsxRuntime.module.js"),
+			})
+		],
+		bundle: true
+	});
 }
