@@ -99,4 +99,63 @@ describe("Bundler",()=>{
 		//console.log(content);
 		expect(content).toEqual(`<div id="outer">the browser outer: <div id="inner" hello="test">the inner: <div>hello, ssr=false</div></div></div>`);
 	});
+
+	it("can use splitting and purging",async ()=>{
+		let projectDir=path.join(__dirname,"../tmp/project-sp");
+
+		await fsp.rm(projectDir,{force:true, recursive: true});
+		await fsp.mkdir(projectDir,{recursive: true});
+		await fsp.writeFile(path.join(projectDir,"index.jsx"),`
+			export default function() {
+				return "hello";
+
+				async function f() {
+					await import("./component.jsx");
+				}
+			}
+		`);
+
+		await fsp.writeFile(path.join(projectDir,"component.jsx"),`
+			export default function() {
+				return "hello";
+			}
+		`);
+
+		await isoqBundle({
+			entrypoint: path.join(projectDir,"index.jsx"),
+			contentdir: path.join(projectDir,"public"),
+			out: path.join(projectDir,"request-handler.js"),
+			splitting: true,
+			quiet: true
+		});
+
+		await fsp.writeFile(path.join(projectDir,"index.jsx"),`
+			export default function() {
+				return "hello and changed";
+
+				async function f() {
+					await import("./component.jsx");
+				}
+			}
+		`);
+
+		await fsp.writeFile(path.join(projectDir,"component.jsx"),`
+			export default function() {
+				return "hello changed";
+			}
+		`);
+
+		await isoqBundle({
+			entrypoint: path.join(projectDir,"index.jsx"),
+			contentdir: path.join(projectDir,"public"),
+			out: path.join(projectDir,"request-handler.js"),
+			purgeOldJs: true,
+			splitting: true,
+			quiet: true,
+		});
+
+		let files=await fsp.readdir(path.join(projectDir,"public"));
+		expect(files.length).toEqual(3);
+		//console.log(files);
+	});
 });

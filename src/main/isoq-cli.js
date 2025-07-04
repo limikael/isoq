@@ -40,7 +40,7 @@ let yargsConf=yargs(hideBin(process.argv))
         description: "Comma separated string with modules to ignore.",
     })
     .option("purge-old-js",{
-        description: "Remove all .js files from contentdir before building. Beware!",
+        description: "Remove all content.*.js files from contentdir before building. Beware!",
         type: "boolean",
     })
     .option("out",{

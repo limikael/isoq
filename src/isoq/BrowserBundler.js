@@ -3,6 +3,7 @@ import {esbuildModuleAlias, esbuildIgnorePaths, esbuildFileContents} from "../ut
 import {mkdirRecursive, exists, rmRecursive, findInPath} from "../utils/fs-util.js";
 import path from "path-browserify";
 import {buf2hex} from "../utils/js-util.js";
+import {minimatch} from "minimatch";
 
 export class BrowserBundler {
 	constructor(conf) {
@@ -119,6 +120,14 @@ export class BrowserBundler {
 
 			this.clientOutDir=this.contentdir;
 			await mkdirRecursive(this.clientOutDir,{fs:this.fs});
+
+			if (this.purgeOldJs) {
+				let files=await this.fs.promises.readdir(this.clientOutDir);
+				for (let file of files) {
+					if (minimatch(file,"client.*.js"))
+						await this.fs.promises.rm(path.join(this.clientOutDir,file));
+				}
+			}
 		}
 
 		else
