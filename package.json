@@ -28,6 +28,7 @@
     "./source-mapper-node": "./src/utils/SourceMapperNode.js",
     "./client-internals": "./src/isoq/client-internals.js",
     "./server-internals": "./src/isoq/server-internals.js",
+    "./utils": "./src/utils/js-util.js",
     "./bundler": {
       "node": "./src/isoq/Bundler.js",
       "browser": "./src/isoq/BrowserBundler.js"
