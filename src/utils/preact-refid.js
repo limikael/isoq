@@ -1,8 +1,9 @@
-import {options} from "preact";
+import {options, Fragment} from "preact";
 
 let currentVNode;
 let refIndex;
 let includeFnames=false;
+//let includeFnames=true;
 
 let oldRender=options.__r;
 options.__r=vnode=>{
@@ -16,12 +17,13 @@ function vnodePath(vnode) {
 	if (!vnode)
 		return "";
 
-	/*if (typeof vnode.type=="function" &&
-			vnode.type.name=="g") {
-		return vnodePath(vnode.__)
-	}*/
+    // Skip unkeyed fragments for consistent pathing
+    if (vnode.type === Fragment && vnode.key == null) {
+        return vnodePath(vnode.__);
+    }
 
 	let name=vnode.type;
+	//console.log(name);
 	if (typeof name=="function") {
 		if (includeFnames)
 			name=name.name;
@@ -35,9 +37,6 @@ function vnodePath(vnode) {
 		if (vnode.__i>=0)
 			key=vnode.__i;
 
-		/*else
-			key=vnode.__.__k.indexOf(vnode);*/
-
 		else if (vnode.__ && vnode.__.__k)
 			key=vnode.__.__k.indexOf(vnode);
 
@@ -46,8 +45,6 @@ function vnodePath(vnode) {
 
 		if (key<0)
 			console.log("warning: negative key in refid")
-		/*if (key<0)
-			key="asdf";*/
 	}
 
 	let parentPath=vnodePath(vnode.__);

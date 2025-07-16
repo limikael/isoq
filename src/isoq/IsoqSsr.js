@@ -5,8 +5,9 @@ import DefaultErrorFallback from "./DefaultErrorFallback.js";
 import {IsoErrorBoundary} from "../components/IsoErrorBoundary.js";
 import {parseCookie, stringifyCookie} from "../utils/js-util.js";
 import SourceMapperNode from "isoq/source-mapper-node";
-import Barrier from "./Barrier.js";
 import urlJoin from "url-join";
+import {IsoRefState, IsoRefContext} from "../utils/iso-ref.js";
+import {renderToStringAsync} from "preact-render-to-string";
 
 export default class IsoqSsr {
 	constructor({clientModule, clientSource, req, localFetch, props, clientPathname, appPathname, wrappers}) {
@@ -16,8 +17,6 @@ export default class IsoqSsr {
 		this.localFetch=localFetch;
 		this.clientPathname=clientPathname;
 		this.appPathname=appPathname;
-		this.refs={};
-		this.barriers={};
 		this.props=props;
 		this.wrappers=wrappers;
 
@@ -35,34 +34,6 @@ export default class IsoqSsr {
 
 	setError(error) {
 		this.error=error;
-	}
-
-	getIsoRef=(id, initial)=>{
-		if (!this.refs[id])
-			this.refs[id]={
-				//id: id, // remove!!
-				current: initial
-			};
-
-		return this.refs[id];
-	}
-
-	getBarrier=(id)=>{
-		if (!this.barriers[id])
-			this.barriers[id]=new Barrier(id);
-
-		return this.barriers[id].resolve;
-	}
-
-	unresolveBarrier(barrierResolver) {
-		if (!barrierResolver.barrierId)
-			throw new Error("Not a barrier");
-
-		let id=barrierResolver.barrierId;
-		let barrier=this.barriers[id];
-
-		//console.log("unresolving: "+barrier.id);
-		barrier.unresolve();
 	}
 
 	redirect(targetUrl) {
@@ -112,29 +83,6 @@ export default class IsoqSsr {
 		return true;
 	}
 
-	async wait() {
-		if (this.error)
-			throw this.error;
-
-		for (let id in this.barriers) {
-			await this.barriers[id].promise;
-		}
-
-		if (this.error)
-			throw this.error;
-	}
-
-	hasPromises() {
-		if (this.error)
-			throw this.error;
-
-		for (let id in this.barriers)
-			if (!this.barriers[id].isResolved())
-				return true;
-
-		return false;
-	}
-
 	async renderError() {
 		let e=this.error;
 
@@ -175,10 +123,14 @@ export default class IsoqSsr {
 		for (let w of [...this.wrappers].reverse())
 			element=createElement(w,props,element);
 
-		this.element=
+		let isoRefState=new IsoRefState();
+
+		element=
 			createElement(IsoContext.Provider,{value: this},
-				createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
-					element
+				createElement(IsoRefContext.Provider,{value: isoRefState},
+					createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
+						element
+					)
 				)
 			);
 
@@ -186,22 +138,8 @@ export default class IsoqSsr {
 		this.headChildren=[];
 
 		try {
-			//console.log("running prepass...");
-			//await prepass(this.element);
-			this.headChildren=[];
-			//console.log("running renderToString...");
-			renderResult=renderToString(this.element);
-
-			while (this.hasPromises()) {
-				await this.wait();
-				//console.log("running prepass...");
-				//await prepass(this.element);
-				this.headChildren=[];
-				//console.log("running renderToString...");
-				renderResult=renderToString(this.element);
-			}
-
-			head=renderToString(this.headChildren);
+			renderResult=await renderToStringAsync(element);
+			head=renderToString(this.headChildren); // FIX it needs to reset between suspense... no it works...
 		}
 
 		catch (e) {
@@ -222,21 +160,11 @@ export default class IsoqSsr {
 			`;
 		}
 
-		let refs={};
-		for (let k in this.refs) {
-			if (this.refs[k].current && this.refs[k].shared)
-				refs[k]={current: this.refs[k].current};
-		}
-
 		let iso={
 			props: props,
-			refs: refs,
+			refs: isoRefState.getSharedRefValues(),
 			appPathname: this.appPathname
 		}
-
-		// FIX FIX FIX!!!
-
-		//console.log("serving, inlineBundle="+globalThis.__ISOQ_OPTIONS.inlineBundle);
 
 		let scriptTag=`<script src="${this.getAppUrl(this.clientPathname)}" type="module"></script>`;
 		if (globalThis.__ISOQ_OPTIONS.inlineBundle)

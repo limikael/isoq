@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "isoq src/index.jsx --out=.target/handler.mjs && serve-fetch .target/handler.mjs"
+    "start": "npx --no-install nodemon --watch src -e jsx,js --exec npm run dev",
+    "dev": "npx --no-install isoq src/index.jsx --no-minify --out=.target/handler.mjs && npx --no-install serve-fetch .target/handler.mjs"
   },
   "dependencies": {
     "isoq": "link:../..",

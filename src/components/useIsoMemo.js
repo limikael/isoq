@@ -1,67 +1,78 @@
-import {useContext} from "react";
+import {useState} from "preact/hooks";
 import {useIsoContext} from "../isoq/IsoContext.js";
-import {useAsyncMemo} from "../utils/react-util.js";
-import {jsonEq} from "../utils/js-util.js";
-import {useIsoRef} from "./useIsoRef.js";
-import {useIsoBarrier} from "./useIsoBarrier.js";
-import {useIsoErrorBoundary} from "./IsoErrorBoundary.js";
+import {useIsoRef} from "../utils/iso-ref.js";
 
-export function useIsoMemo(fn, deps=[]) {
-	let iso=useIsoContext();
-	let ref=useIsoRef();
-	let barrier=useIsoBarrier();
-	let throwError=useIsoErrorBoundary();
+export function useIsoMemo(asyncFn, deps=[], options={}) {
+    let iso=useIsoContext();
+    let [, forceUpdate]=useState({});
 
-	// Server
-	if (iso.isSsr()) {
-		if (ref.current)
-			return ref.current.data;
+    let ref=useIsoRef({
+        result: undefined,
+        error: undefined,
+        status: "idle",
+        deps: undefined,
+    },{shared: options.shared});
 
-		(async()=>{
-			try {
-				ref.current={deps: deps};
-				ref.current.data=await fn();
-			}
+    let localRef=useIsoRef({
+        promise: null,
+        pendingNextRun: false,
+    },{shared: false});
 
-			catch (e) {
-				console.log("caught error in useIsoMemo");
-				console.error(e);
-				throwError(e);
-			}
+    if (iso.hydration) {
+        console.log("yep, hydration");
+        // Skip execution on hydration; trigger re-render post hydration
+        setTimeout(() => forceUpdate({}), 0);
+        return;
+    }
 
-			barrier();
-		})();
-	}
+    if (iso.isSsr() && options.server===false)
+        return;
 
-	// Client
-	else {
-		let memoRes=useAsyncMemo(async()=>{
-			if (ref.current && jsonEq(ref.current.deps,deps)) {
-				barrier();
-				return;
-			}
+    deps=JSON.stringify(deps);
+    let depsChanged = ref.current.deps === undefined || ref.current.deps!=deps;
 
-			ref.current=null;
-			let data=await fn();
-			barrier();
-			ref.current={
-				deps: deps,
-				data: data
-			};
+    if (depsChanged) {
+        ref.current.deps = deps;
 
-			return {};
-		},deps);
+        if (ref.current.status === "pending") {
+            // A request is running; mark to rerun after it completes
+            localRef.current.pendingNextRun = true;
+        } else {
+            ref.current.status = "pending";
+            localRef.current.promise = asyncFn()
+                .then(result => {
+                    ref.current.result = result;
+                    ref.current.status = "success";
+                })
+                .catch(err => {
+                    ref.current.error = err;
+                    ref.current.status = "error";
+                })
+                .finally(() => {
+                    if (localRef.current.pendingNextRun) {
+                        localRef.current.pendingNextRun = false;
+                        ref.current.status = "pending";
+                        localRef.current.promise = asyncFn()
+                            .then(result => {
+                                ref.current.result = result;
+                                ref.current.status = "success";
+                            })
+                            .catch(err => {
+                                ref.current.error = err;
+                                ref.current.status = "error";
+                            });
+                    }
+                });
+        }
+    }
 
-		if (memoRes instanceof Error) {
-			throwError(memoRes);
-			return;
-		}
+    if (ref.current.status === "pending") {
+        throw localRef.current.promise;
+    }
 
-		if (ref.current && jsonEq(ref.current.deps,deps)) {
-			barrier();
-			return ref.current.data;
-		}
-	}
+    if (ref.current.status === "error") {
+        throw ref.current.error;
+    }
+
+    return ref.current.result;
 }
-
-export default useIsoMemo;

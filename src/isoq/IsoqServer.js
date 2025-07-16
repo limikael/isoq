@@ -1,7 +1,6 @@
 import React from "preact/compat";
 import {createElement} from "preact/compat";
 import IsoqSsr from "./IsoqSsr.js";
-import {render as renderToString} from "preact-render-to-string";
 import favicon from "./favicon.js";
 import {splitPath, jsonEq} from "../utils/js-util.js";
 

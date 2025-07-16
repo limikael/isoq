@@ -83,3 +83,11 @@ export function buf2hex(buffer) { // buffer is an ArrayBuffer
         .map(x => x.toString(16).padStart(2, '0'))
         .join('');
 }
+
+export function arrayRemove(array, item) {
+	let index=array.indexOf(item);
+	if (index>=0)
+		array.splice(index,1);
+
+	return array;
+}

@@ -1,13 +1,10 @@
 export {Head} from "../components/Head.js";
 export {urlGetArgs, urlGetParams} from "../utils/js-util.js";
 export {useIsoMemo} from "../components/useIsoMemo.js";
-export {useIsoRef} from "../components/useIsoRef.js";
-export {useIsoBarrier} from "../components/useIsoBarrier.js";
 export {useIsoCookie} from "../components/useIsoCookie.js";
 export {useIsoContext} from "../isoq/IsoContext.js";
-export {useIsoId} from "../components/useIsoId.js";
 export {useIsLoading} from "../components/useIsLoading.js";
 export {IsoErrorBoundary, useIsoErrorBoundary} from "../components/IsoErrorBoundary.js";
-export {IsoSuspense} from "../components/IsoSuspense.js";
 export {useRefId} from "../utils/preact-refid.js";
+export {useIsoRef, IsoSuspense} from "../utils/iso-ref.js";
 export {IsoModifyContext} from "../components/IsoModifyContext.js";

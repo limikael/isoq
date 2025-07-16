@@ -15,17 +15,6 @@ export default class IsoqClient {
 		this.undefRefs=[];
 	}
 
-	getIsoRef(id) {
-		if (this.hydration && !this.refs.hasOwnProperty(id))
-			this.undefRefs.push(id);
-
-		return this.refs[id];
-	}
-
-	markIsoRefStale(id) {
-		delete this.refs[id];
-	}
-
 	isSsr() {
 		return false;
 	}
@@ -56,13 +45,6 @@ export default class IsoqClient {
 			url=new URL(this.req.url).origin+url;
 
 		return await this.window.fetch(url,options);
-	}
-
-	getBarrier(id) {
-		return ()=>{};
-	}
-
-	unresolveBarrier() {
 	}
 
 	getCookie(key) {

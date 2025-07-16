@@ -29,6 +29,7 @@
     "./client-internals": "./src/isoq/client-internals.js",
     "./server-internals": "./src/isoq/server-internals.js",
     "./utils": "./src/utils/js-util.js",
+    "./iso-ref": "./src/utils/iso-ref.js",
     "./bundler": {
       "node": "./src/isoq/Bundler.js",
       "browser": "./src/isoq/BrowserBundler.js"
@@ -37,6 +38,7 @@
   "devDependencies": {
     "jasmine": "^5.8.0",
     "jsdom": "^26.1.0",
+    "nodemon": "^3.1.10",
     "serve-fetch": "^1.0.4"
   },
   "sideEffects": false
