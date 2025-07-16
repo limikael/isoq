@@ -1,6 +1,5 @@
-import {IsoRefContext, IsoRefState, useIsoRef, IsoSuspense} from "isoq/iso-ref";
 import {useRef, useState, Suspense} from "react";
-import {Head, useIsoContext, useIsoMemo} from "isoq";
+import {Head, useIsoContext, useIsoMemo, useIsoRef, IsoSuspense} from "isoq";
 
 function Page1() {
 	return (
@@ -13,9 +12,14 @@ function Page2({count}) {
 		console.log("computing for: "+count);
 		await new Promise(r=>setTimeout(r,1000));
 		return "compute for: "+count;
-	},[count],{server: false});
+	},[count]);
 
     let ref=useIsoRef(1);
+
+    if (!val)
+    	return;
+
+    console.log("computeval="+val);
 
 	return (<>
 		<div>this is page 2, refval={ref.current}, computeval={val}</div>

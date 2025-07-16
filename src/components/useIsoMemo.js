@@ -13,17 +13,13 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
         deps: undefined,
     },{shared: options.shared});
 
+    //console.log("ref: ",ref);
+
     let localRef=useIsoRef({
         promise: null,
         pendingNextRun: false,
     },{shared: false});
 
-    if (iso.hydration) {
-        console.log("yep, hydration");
-        // Skip execution on hydration; trigger re-render post hydration
-        setTimeout(() => forceUpdate({}), 0);
-        return;
-    }
 
     if (iso.isSsr() && options.server===false)
         return;
@@ -32,6 +28,13 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
     let depsChanged = ref.current.deps === undefined || ref.current.deps!=deps;
 
     if (depsChanged) {
+        if (iso.hydration) {
+            console.log("yep, hydration");
+            // Skip execution on hydration; trigger re-render post hydration
+            setTimeout(() => forceUpdate({}), 0);
+            return;
+        }
+
         ref.current.deps = deps;
 
         if (ref.current.status === "pending") {

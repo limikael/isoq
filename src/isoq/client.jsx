@@ -3,6 +3,7 @@ import Browser from "@browser";
 import {IsoqClient, IsoContext, IsoErrorBoundary, DefaultErrorFallback} from "isoq/client-internals";
 import {hydrate} from "preact";
 import {IsoRefState, IsoRefContext} from "../utils/iso-ref.js";
+import {RouterState, Router} from "../components/router.jsx";
 
 if (!window.__isoError && window.__iso) {
 	let isoClient=new IsoqClient({...window.__iso, window: window});
@@ -13,13 +14,16 @@ if (!window.__isoError && window.__iso) {
 		content=<W {...isoClient.props}>{content}</W>
 
 	let isoRefState=new IsoRefState({initialRefValues: window.__iso.refs});
+	let routerState=new RouterState({url: isoClient.getUrl(), iso: isoClient});
 
 	content=(
 		<IsoContext.Provider value={isoClient}>
 			<IsoRefContext.Provider value={isoRefState}>
-				<IsoErrorBoundary fallback={DefaultErrorFallback}>
-					{content}
-				</IsoErrorBoundary>
+				<Router routerState={routerState}>
+					<IsoErrorBoundary fallback={DefaultErrorFallback}>
+						{content}
+					</IsoErrorBoundary>
+				</Router>
 			</IsoRefContext.Provider>
 		</IsoContext.Provider>
 	)

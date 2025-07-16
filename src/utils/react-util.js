@@ -1,6 +1,6 @@
 import {useState, useRef, useMemo, useCallback, useLayoutEffect} from "react";
 
-export function useAsyncMemo(fn, deps=[]) {
+/*export function useAsyncMemo(fn, deps=[]) {
 	let [val,setVal]=useState();
 	let queueRef=useRef();
 	let runningRef=useRef();
@@ -47,7 +47,7 @@ export function useAsyncMemo(fn, deps=[]) {
 	},deps);
 
 	return val;
-}
+}*/
 
 export function useEventListener(o, ev, fn) {
 	useLayoutEffect(()=>{

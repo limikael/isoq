@@ -36,9 +36,9 @@ export default class IsoqClient {
 		return this.window;
 	}
 
-	redirect(url) {
+	/*redirect(url) {
 		this.window.location=url;
-	}
+	}*/
 
 	fetch=async (url,options={})=>{
 		if (url.startsWith("/"))

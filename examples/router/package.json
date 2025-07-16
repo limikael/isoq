@@ -1,0 +1,13 @@
+{
+  "name": "suspense",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "npx --no-install nodemon --watch src -e jsx,js --exec npm run dev",
+    "dev": "npx --no-install isoq src/index.jsx --no-minify --out=.target/handler.mjs && npx --no-install serve-fetch .target/handler.mjs"
+  },
+  "dependencies": {
+    "isoq": "link:../..",
+    "serve-fetch": "^1.0.1"
+  }
+}

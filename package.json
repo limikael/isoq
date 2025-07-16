@@ -29,7 +29,7 @@
     "./client-internals": "./src/isoq/client-internals.js",
     "./server-internals": "./src/isoq/server-internals.js",
     "./utils": "./src/utils/js-util.js",
-    "./iso-ref": "./src/utils/iso-ref.js",
+    "./router": "./src/components/router.jsx",
     "./bundler": {
       "node": "./src/isoq/Bundler.js",
       "browser": "./src/isoq/BrowserBundler.js"

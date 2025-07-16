@@ -29,7 +29,7 @@ describe("isoref",()=>{
 		out=renderToString(t);
 		expect(out).toEqual("current: another");
 
-		expect(isoRefState.getRefValues()).toEqual({"C0/C0#1": "another"});
+		expect(isoRefState.getSharedRefValues()).toEqual({"C0/C0#1": "another"});
 	});
 
 	it("can populate the state on init",async ()=>{

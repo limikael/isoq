@@ -8,6 +8,7 @@ import SourceMapperNode from "isoq/source-mapper-node";
 import urlJoin from "url-join";
 import {IsoRefState, IsoRefContext} from "../utils/iso-ref.js";
 import {renderToStringAsync} from "preact-render-to-string";
+import {RouterState, Router} from "../components/router.jsx";
 
 export default class IsoqSsr {
 	constructor({clientModule, clientSource, req, localFetch, props, clientPathname, appPathname, wrappers}) {
@@ -36,14 +37,14 @@ export default class IsoqSsr {
 		this.error=error;
 	}
 
-	redirect(targetUrl) {
+	/*redirect(targetUrl) {
 		let headers=this.getCookieHeaders();
 		headers.set("location",targetUrl);
 		this.response=new Response("Moved",{
 			status: 302,
 			headers: headers
 		});
-	}
+	}*/
 
 	getUrl() {
 		return this.req.url;
@@ -124,12 +125,15 @@ export default class IsoqSsr {
 			element=createElement(w,props,element);
 
 		let isoRefState=new IsoRefState();
+		let routerState=new RouterState({url: this.getUrl()});
 
 		element=
 			createElement(IsoContext.Provider,{value: this},
 				createElement(IsoRefContext.Provider,{value: isoRefState},
-					createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
-						element
+					createElement(Router,{routerState: routerState},
+						createElement(IsoErrorBoundary,{fallback: DefaultErrorFallback},
+							element
+						)
 					)
 				)
 			);
@@ -145,6 +149,17 @@ export default class IsoqSsr {
 		catch (e) {
 			this.error=e;
 			return await this.renderError();
+		}
+
+		if (routerState.redirectUrl) {
+			let headers=this.getCookieHeaders();
+			headers.set("location",routerState.redirectUrl);
+			this.response=new Response("Moved",{
+				status: 302,
+				headers: headers
+			});
+
+			return;
 		}
 
 		let sourceMapScripts="";
