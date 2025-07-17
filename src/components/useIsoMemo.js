@@ -1,8 +1,10 @@
 import {useState, useLayoutEffect} from "preact/hooks";
 import {useIsoContext} from "../isoq/IsoContext.js";
+import {useLoadingState} from "../components/useIsLoading.js";
 import {useIsoRef} from "../utils/iso-ref.js";
 
 export function useIsoMemo(asyncFn, deps=[], options={}) {
+    let loadingState=useLoadingState();
     let iso=useIsoContext();
     let [, forceUpdate]=useState({});
 
@@ -53,6 +55,7 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
         } 
 
         else {
+            loadingState.updateCount(1);
             function run() {
                 ref.current.status = "pending";
                 localRef.current.pendingNextRun = false;
@@ -71,6 +74,9 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
                 .finally(()=>{
                     if (localRef.current.pendingNextRun)
                         run();
+
+                    else
+                        loadingState.updateCount(-1);
                 });
             }
 

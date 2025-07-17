@@ -1,5 +1,5 @@
 import {useRef, useState, Suspense} from "react";
-import {Head, useIsoContext, useIsoMemo, useIsoRef, IsoSuspense} from "isoq";
+import {Head, useIsoContext, useIsoMemo, useIsoRef, IsoSuspense, useIsLoading} from "isoq";
 
 function Page1() {
 	return (
@@ -55,12 +55,15 @@ function Page3() {
 export default function() {
 	let [currentPage, setCurrentPage]=useState("page2");
     let [count,setCount]=useState(1);
+    let loading=useIsLoading();
 
 	return (<>
 		<Head>
 			<meta name="description" content="this is a page"/>
 			<meta name="number" content="123"/>
 		</Head>
+
+		<div>Loading: {String(loading)}</div>
 
 		<div>count: {count} <button onClick={()=>{setCount(count+1)}}>+</button></div>
 		<button onClick={()=>setCurrentPage("page1")}>page 1</button>

@@ -44,6 +44,8 @@ export function useLoadingState() {
 //export let LoadingContext=createContext(new LoadingState());
 
 export function useIsLoading() {
+	//console.log("render is loading");
+
 	let loadingState=useLoadingState();
 	useEventUpdate(loadingState,"loadingStateChange");
 
