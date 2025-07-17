@@ -1,11 +1,9 @@
 import {useIsoContext} from "../isoq/IsoContext.js";
+import {useRedirect} from "./router.jsx";
 
 export function Link({href, ...props}) {
-	let iso=useIsoContext();
+	let redirect=useRedirect();
 	let Element="a";
-
-	if (href)
-		href=iso.getAppUrl(href);
 
 	function onLinkClick(ev) {
 		if (props.onClick)
@@ -18,12 +16,8 @@ export function Link({href, ...props}) {
 			return;
 
 		ev.preventDefault();
-		if (href) {
-			iso.redirect(href);
-			//let targetUrl=String(new URL(props.href,window.location));
-			//let targetUrl=iso.getAppUrl(props.href);
-			//router.setPendingUrl(href);
-		}
+		if (href)
+			redirect(href);
 	}
 
 	return <Element href={href} {...props} onClick={onLinkClick}>{props.children}</Element>

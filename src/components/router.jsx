@@ -3,7 +3,7 @@ import {useEventUpdate} from "../utils/react-util.js";
 import {urlMatchPath, urlGetArgs} from "../utils/js-util.js";
 import {IsoSuspense} from "isoq";
 
-FIX USE IS LOADING!!!
+//FIX USE IS LOADING!!!
 
 const RouterContext=createContext();
 const RouteContext=createContext();

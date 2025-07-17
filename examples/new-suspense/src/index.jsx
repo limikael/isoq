@@ -8,6 +8,9 @@ function Page1() {
 }
 
 function Page2({count}) {
+	let countRef=useRef();
+	countRef.current=count;
+
 	let val=useIsoMemo(async()=>{
 		console.log("computing for: "+count);
 		await new Promise(r=>setTimeout(r,1000));

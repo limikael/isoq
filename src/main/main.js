@@ -8,6 +8,6 @@ export {IsoErrorBoundary, useIsoErrorBoundary} from "../components/IsoErrorBound
 export {useRefId} from "../utils/preact-refid.js";
 export {useIsoRef, IsoSuspense} from "../utils/iso-ref.js";
 export {IsoModifyContext} from "../components/IsoModifyContext.js";
-export {Router, RouterState, Route, useRedirect,
+export {Router, RouterState, Route, useRedirect, 
 		useRouteLocation, useLocation, useRouteArgs, useRouteParams} from "../components/router.jsx";
 export {Link} from "../components/Link.jsx";
