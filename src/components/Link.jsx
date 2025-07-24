@@ -1,7 +1,10 @@
 import {useIsoContext} from "../isoq/IsoContext.js";
 import {useRedirect} from "./router.jsx";
 
-export function Link({href, ...props}) {
+export function Link({href, to, ...props}) {
+	if (to && !href)
+		href=to;
+
 	let redirect=useRedirect();
 	let Element="a";
 

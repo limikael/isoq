@@ -1,17 +1,20 @@
-import {createContext, useContext, useLayoutEffect, useEffect} from "react";
+import {createContext, useContext, useLayoutEffect, useEffect, useRef} from "react";
 import {useEventUpdate} from "../utils/react-util.js";
 import {urlMatchPath, urlGetArgs} from "../utils/js-util.js";
 import {IsoSuspense} from "isoq";
-
-//FIX USE IS LOADING!!!
 
 const RouterContext=createContext();
 const RouteContext=createContext();
 const RouteMatchContext=createContext();
 
 export function useRedirect() {
+	let redirectedRef=useRef();
 	let routerState=useContext(RouterContext);
 	return (url=>{
+		if (redirectedRef.current==url)
+			return;
+
+		redirectedRef.current=url;
 		routerState.setUrl(url);
 	});
 }
