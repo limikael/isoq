@@ -1,45 +1,35 @@
 {
   "name": "isoq",
+  "version": "1.0.0",
+  "description": "",
   "scripts": {
     "test": "jasmine"
   },
-  "version": "1.1.33",
-  "license": "MIT",
-  "type": "module",
   "bin": {
-    "isoq": "src/main/isoq-cli.js"
+    "isoq": "src/main/isoq.js"
   },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.1",
   "dependencies": {
-    "@einheit/path-resolve": "^1.2.0",
-    "esbuild": "^0.19.2",
+    "commander": "^14.0.0",
+    "esbuild": "^0.25.8",
     "minimatch": "^10.0.3",
-    "path-browserify": "^1.0.1",
-    "preact": "^10.22.0",
-    "preact-render-to-string": "^6.2.1",
-    "source-map": "^0.7.4",
-    "stacktrace-parser": "^0.1.10",
-    "url-join": "^5.0.0",
-    "yargs": "^17.7.2"
-  },
-  "exports": {
-    ".": "./src/main/main.js",
-    "./esbuild-util": "./src/utils/esbuild-util.js",
-    "./preact-shim": "./src/utils/preact-shim.js",
-    "./source-mapper-node": "./src/utils/SourceMapperNode.js",
-    "./client-internals": "./src/isoq/client-internals.js",
-    "./server-internals": "./src/isoq/server-internals.js",
-    "./utils": "./src/utils/js-util.js",
-    "./router": "./src/components/router.jsx",
-    "./bundler": {
-      "node": "./src/isoq/Bundler.js",
-      "browser": "./src/isoq/BrowserBundler.js"
-    }
+    "preact": "^10.27.0",
+    "preact-render-to-string": "^6.5.13"
   },
   "devDependencies": {
-    "jasmine": "^5.8.0",
+    "isoq": "link:.",
+    "jasmine": "^5.9.0",
     "jsdom": "^26.1.0",
-    "nodemon": "^3.1.10",
-    "serve-fetch": "^1.0.4"
+    "mime": "^4.0.7",
+    "serve-fetch": "^1.0.5"
   },
-  "sideEffects": false
+  "exports": {
+    ".": "./src/components/exports.jsx",
+    "./server": "./src/main/server-exports.js",
+    "./commands": "./src/main/isoq-commands.js"
+  }
 }

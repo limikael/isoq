@@ -115,3 +115,16 @@ export function arrayRemove(array, item) {
 
 	return array;
 }
+
+export function replaceFromSubstring(str, sub, replacement) {
+  const idx = str.indexOf(sub);
+  if (idx === -1) return str; // substring not found, return original
+  return str.slice(0, idx) + replacement;
+}
+
+export class DeclaredError extends Error {
+	constructor(...args) {
+		super(...args);
+		this.declared=true;
+	}
+}

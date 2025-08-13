@@ -1,0 +1,8 @@
+{
+	"type": "module",
+	"scripts": {
+		"preinstall": "echo 'not meant to be installed\n' && exit 1",
+		"build": "../../src/main/isoq.js --out request-handler.js index.jsx --contentdir public",
+		"dev": "pnpm build && node server.js"
+	}
+}

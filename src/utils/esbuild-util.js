@@ -1,4 +1,4 @@
-import path from "path-browserify";
+//import path from "path-browserify";
 
 export function esbuildFileContents(filemap, {namespace, resolveDir}={}) {
 	if (!namespace)

@@ -1,7 +1,8 @@
-import {createContext, useContext, useLayoutEffect, useEffect, useRef} from "react";
+import {createContext} from "preact";
+import {useContext, useLayoutEffect, useEffect, useRef} from "preact/hooks";
 import {useEventUpdate} from "../utils/react-util.js";
 import {urlMatchPath, urlGetArgs} from "../utils/js-util.js";
-import {IsoSuspense} from "isoq";
+import {IsoSuspense} from "./iso-ref.js";
 
 const RouterContext=createContext();
 const RouteContext=createContext();
@@ -138,10 +139,10 @@ function CheckMount({onMount, children}) {
 export function Router({routerState, children}) {
 	useEventUpdate(routerState,"change");
 
-	//return children;
+	//console.log(routerState);
 
 	return (
-		<RouterContext value={routerState}>
+		<RouterContext.Provider value={routerState}>
 			<IsoSuspense key={"route-"+routerState.committedVersion}>
 				<div style={{display: "contents"}}>
 					<CheckMount>
@@ -162,6 +163,6 @@ export function Router({routerState, children}) {
 					</div>
 				</IsoSuspense>
 			}
-		</RouterContext>
+		</RouterContext.Provider>
 	);
 }
