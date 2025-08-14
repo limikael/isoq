@@ -152,7 +152,8 @@ describe("isoq",()=>{
 		});
 
 		let files=await fsp.readdir(path.join(projectDir,"public"));
-		expect(files.length).toEqual(4);
+		//console.log(files);
+		expect(files.length).toEqual(5);
 
 		await fsp.writeFile(path.join(projectDir,"index.jsx"),`
 			export default function() {
@@ -180,7 +181,7 @@ describe("isoq",()=>{
 		});
 
 		files=await fsp.readdir(path.join(projectDir,"public"));
-		expect(files.length).toEqual(6);
+		expect(files.length).toEqual(7);
 
 		await isoqBundle({
 			entrypoint: path.join(projectDir,"index.jsx"),
@@ -192,7 +193,7 @@ describe("isoq",()=>{
 		});
 
 		files=await fsp.readdir(path.join(projectDir,"public"));
-		expect(files.length).toEqual(4);
+		expect(files.length).toEqual(5);
 		//console.log(files);
 	});
 });
