@@ -21,9 +21,10 @@ export default function({hello}) {
 	}
 
 	//throw new Error("nope...");
+	/*	<IsoErrorBoundary fallback={ErrorFallback}>
+		</IsoErrorBoundary>*/
 
 	return (<>
-		<IsoErrorBoundary fallback={ErrorFallback}>
 			ref: {ref.current}
 			hello: {hello}
 			<div>
@@ -32,7 +33,6 @@ export default function({hello}) {
 			</div>
 			<Route path="/pageone"><Pageone/></Route>
 			<Route path="/pagetwo"><Pagetwo/></Route>
-		</IsoErrorBoundary>
 	</>);
 }
 

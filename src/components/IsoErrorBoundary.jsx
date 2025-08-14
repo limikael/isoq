@@ -2,6 +2,18 @@ import {Component} from "preact";
 import {useState} from "preact/hooks";
 import {useIsoContext} from "./IsoContext.jsx";
 
+function getFullErrorStack(err) {
+    const name = err.name || "Error";
+    const message = err.message || "";
+    const header = message ? `${name}: ${message}` : name;
+
+    const stack = err.stack || "";
+    if (!stack.startsWith(header)) {
+        return header + (stack ? `\n${stack}` : "");
+    }
+    return stack;
+}
+
 export function DefaultErrorFallback({error}) {
     let style={
         position: "fixed",
@@ -22,13 +34,7 @@ export function DefaultErrorFallback({error}) {
         whiteSpace: "pre"
     }
 
-    //console.error(error);
-
-    let message=error.toString();
-    if (error.stack)
-        message=error.stack;
-
-    return <div style={style}>{message}</div>
+    return <div style={style}>{getFullErrorStack(error)}</div>
 }
 
 class ErrorBoundary extends Component {
