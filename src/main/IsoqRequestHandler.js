@@ -28,11 +28,19 @@ export default class IsoqRequestHandler {
 			localFetch: options.localFetch
 		});
 
-		let content=await this.clientModule.ssrRender({isoState});
-		let head=renderToString(isoState.headChildren);
-		let scriptTag=`<script type="module" src="/client.js"></script>`;
-		if (this.inlineBundle)
-			scriptTag=`<script>${this.clientSource}</script>`;
+		let content,head="",scriptTag="";
+
+		try {
+			content=await this.clientModule.ssrRender({isoState});
+			head=renderToString(isoState.headChildren);
+			scriptTag=`<script type="module" src="/client.js"></script>`;
+			if (this.inlineBundle)
+				scriptTag=`<script>${this.clientSource}</script>`;
+		}
+
+		catch (error) {
+			content=await this.clientModule.ssrRenderError({isoState, error});
+		}
 
 		let htmlContent=`<!DOCTYPE html>
 			<html style="height: 100%">

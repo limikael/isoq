@@ -37,12 +37,15 @@ if (globalThis.window && globalThis.window.__iso) {
 
 /* SSR */
 
-export {createIsoState};
-
 async function ssrRender({isoState}) {
 	let element=<Element isoState={isoState}/>;
 	return await renderToStringAsync(element);
 }
 
-export {ssrRender};
+async function ssrRenderError({isoState, error}) {
+	let Fallback=isoState.errorFallback;
+	return await renderToStringAsync(<Fallback error={error}/>);
+}
+
+export {createIsoState, ssrRender, ssrRenderError};
 `;

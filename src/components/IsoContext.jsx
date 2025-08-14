@@ -4,7 +4,7 @@ import {IsoRefContext} from "./iso-ref.js";
 import {Router} from "./router.jsx";
 import {IsoRefState} from "./iso-ref.js";
 import {RouterState} from "./router.jsx";
-import ErrorBoundary from "../utils/ErrorBoundary.js";
+import {IsoErrorBoundary, DefaultErrorFallback} from "./IsoErrorBoundary.jsx";
 
 export class IsoState {
 	constructor({refs, props, url, localFetch}={}) {
@@ -14,6 +14,7 @@ export class IsoState {
 		this.props=props;
 		this.headChildren=[];
 		this.localFetch=localFetch;
+		this.errorFallback=DefaultErrorFallback;
 	}
 
 	isSsr() {
@@ -51,19 +52,15 @@ export function useIsoContext() {
 }
 
 export function IsoContextProvider({isoState, children}) {
-	/*function handleError(e) {
-		console.log(e);
-	}
-		<ErrorBoundary onError={handleError}>
-		</ErrorBoundary>*/
-
 	return (
-			<IsoContext.Provider value={isoState}>
+		<IsoContext.Provider value={isoState}>
+			<IsoErrorBoundary fallback={DefaultErrorFallback}>
 				<IsoRefContext.Provider value={isoState.isoRefState}>
 					<Router routerState={isoState.routerState}>
 						{children}
 					</Router>
 				</IsoRefContext.Provider>
-			</IsoContext.Provider>
+			</IsoErrorBoundary>
+		</IsoContext.Provider>
 	);
 }
