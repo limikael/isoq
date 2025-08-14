@@ -6,11 +6,19 @@ export default `
 // Don't edit this file, and don't put it under version control!
 //
 
-import {createIsoState, IsoContextProvider} from "isoq";
+import {IsoState, IsoContextProvider, IsoContext} from "isoq";
 import {hydrate, createElement} from "preact";
 import {renderToStringAsync} from "preact-render-to-string";
 
 $$IMPORTS$$
+
+function createIsoState(isoStateParams) {
+	return new IsoState({
+		sourceRoot: options.sourceRoot,
+		sourcemap: options.sourcemap,
+		...isoStateParams
+	});
+}
 
 function Element({isoState}) {
 	let content=<Entrypoint {...isoState.props}/>;
@@ -44,7 +52,11 @@ async function ssrRender({isoState}) {
 
 async function ssrRenderError({isoState, error}) {
 	let Fallback=isoState.errorFallback;
-	return await renderToStringAsync(<Fallback error={error}/>);
+	return await renderToStringAsync(
+		<IsoContext.Provider value={isoState}>
+			<Fallback error={error}/>
+		</IsoContext.Provider>
+	);
 }
 
 export {createIsoState, ssrRender, ssrRenderError};

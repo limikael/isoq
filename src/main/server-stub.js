@@ -10,9 +10,12 @@ import {IsoqRequestHandler} from $$ISOQ_SERVER$$;
 import * as clientModule from $$CLIENT_MODULE$$;
 let clientSource=$$CLIENT_SOURCE$$;
 
+$$FS_IMPORT$$
+
 let requestHandlerInstance=new IsoqRequestHandler({
 	clientModule: clientModule,
 	clientSource: clientSource,
+	fs: fs,
 	...$$OPTIONS$$
 });
 

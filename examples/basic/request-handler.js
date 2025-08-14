@@ -10,9 +10,12 @@ import {IsoqRequestHandler} from "/home/micke/Repo/isoq/src/main/server-exports.
 import * as clientModule from "/home/micke/Repo/isoq/examples/basic/public/client-ssr.js";
 let clientSource=null;
 
+import fs from "fs";
+
 let requestHandlerInstance=new IsoqRequestHandler({
 	clientModule: clientModule,
 	clientSource: clientSource,
+	fs: fs,
 	...{}
 });
 

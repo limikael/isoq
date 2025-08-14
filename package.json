@@ -14,9 +14,11 @@
   "license": "ISC",
   "packageManager": "pnpm@10.12.1",
   "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.30",
     "commander": "^14.0.0",
     "esbuild": "^0.25.8",
     "minimatch": "^10.0.3",
+    "path-browserify": "^1.0.1",
     "preact": "^10.27.0",
     "preact-render-to-string": "^6.5.13"
   },

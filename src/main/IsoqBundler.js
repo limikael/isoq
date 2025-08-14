@@ -16,6 +16,7 @@ const require = createRequire(import.meta.url);
 export default class IsoqBundler {
 	constructor({out, tmpdir, entrypoint, inlineBundle, wrappers, 
 			minify, quiet, contentdir, splitting, purgeOldJs,
+			sourcemap, sourceRoot,
 			...more}={}) {
 		if (Object.keys(more).length)
 			throw new DeclaredError("Unknown options for IsoqBundler: "+Object.keys(more).join(","));
@@ -53,6 +54,11 @@ export default class IsoqBundler {
 
 		if (this.splitting && !this.contentdir)
 			throw new Error("Code splitting requires contentdir.");
+
+		if (sourceRoot)
+			this.sourceRoot=path.resolve(sourceRoot);
+
+		this.sourcemap=sourcemap;
 	}
 
 	async initTmpdir() {
@@ -81,6 +87,10 @@ export default class IsoqBundler {
 			imports+=`import __Wrapper${i} from ${JSON.stringify(this.wrappers[i])};\n`;
 
 		imports+=`const __wrappers=[${this.wrappers.map((_,i)=>"__Wrapper"+i).join(",")}];\n`;
+		imports+="const options="+JSON.stringify({
+			sourceRoot: this.sourceRoot,
+			sourcemap: this.sourcemap
+		})+";\n";
 
 		let s=CLIENT_STUB.replace("$$IMPORTS$$",imports);
 		await fsp.writeFile(path.join(this.tmpdir,"client-ssr.jsx"),s);
@@ -135,6 +145,8 @@ export default class IsoqBundler {
 			minify: this.minify,
 			splitting: this.splitting,
 			chunkNames: "client.[hash]",
+			sourcemap: this.sourcemap?"inline":undefined,
+			sourceRoot: outdir,
 			plugins: [
 				esbuildModuleAlias({
 					"preact": require.resolve("preact"),
@@ -155,10 +167,12 @@ export default class IsoqBundler {
 			clientModuleSource=await fsp.readFile(path.join(outdir,"client.js"),"utf8");
 		serverSource=serverSource.replace("$$CLIENT_SOURCE$$",JSON.stringify(clientModuleSource));
 
+		serverSource=serverSource.replace("$$FS_IMPORT$$",`import fs from "fs";`);
+
 		let isoqServerImport=path.resolve(__dirname,"../main/server-exports.js");
 		serverSource=serverSource.replace("$$ISOQ_SERVER$$",JSON.stringify(isoqServerImport));
 		serverSource=serverSource.replace("$$OPTIONS$$",JSON.stringify({
-			inlineBundle: this.inlineBundle
+			inlineBundle: this.inlineBundle,
 		}));
 
 		await fsp.writeFile(this.out,serverSource);

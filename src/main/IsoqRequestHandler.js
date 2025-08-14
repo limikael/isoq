@@ -1,10 +1,11 @@
 import {renderToString} from "preact-render-to-string";
 
 export default class IsoqRequestHandler {
-	constructor({clientModule, clientSource, inlineBundle}) {
+	constructor({clientModule, clientSource, inlineBundle, fs}) {
 		this.clientModule=clientModule;
 		this.clientSource=clientSource;
 		this.inlineBundle=inlineBundle;
+		this.fs=fs;
 	}
 
 	handleRequest=async (request, options={})=>{
@@ -25,7 +26,8 @@ export default class IsoqRequestHandler {
 		let isoState=this.clientModule.createIsoState({
 			url: u,
 			props: options.props,
-			localFetch: options.localFetch
+			localFetch: options.localFetch,
+			fs: this.fs
 		});
 
 		let content,head="",scriptTag="";
