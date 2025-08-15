@@ -5,6 +5,8 @@ import {Router} from "./router.jsx";
 import {IsoRefState} from "./iso-ref.js";
 import {RouterState} from "./router.jsx";
 import {IsoErrorBoundary, DefaultErrorFallback} from "./IsoErrorBoundary.jsx";
+import {errorCreateStackFrames} from "../utils/error-util.js";
+import {TraceMap, originalPositionFor} from '@jridgewell/trace-mapping';
 
 export class IsoState {
 	constructor({refs, props, url, localFetch, sourceRoot, sourcemap, fs}={}) {
@@ -45,21 +47,13 @@ export class IsoState {
 		return await globalThis.fetch(url,options);
 	}
 
-	loadBundleSync() {
-		if (!this.isSsr())
-			throw new Error("Can only load sync on server");
-
-		let source=this.fs.readFileSync("/home/micke/Repo/isoq/examples/basic/public/client-ssr.js","utf8");
-		return source;
-	}
-
-	async loadBundleAsync() {
-		if (this.isSsr())
-			throw new Error("Can not load async bundle on client");
-
-        let bundleUrl=new URL("/client.js",location.origin).toString();
-        let bundleCode=await fetch(bundleUrl).then(r=>r.text());
-        return bundleCode;
+	async processError(error) {
+		error.stackFrames=await errorCreateStackFrames({
+			stack: error.stack, 
+			sourceRoot: this.sourceRoot,
+			sourcemap: this.sourcemap,
+			fs: this.fs,
+		});
 	}
 }
 

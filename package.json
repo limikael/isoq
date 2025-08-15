@@ -20,7 +20,8 @@
     "minimatch": "^10.0.3",
     "path-browserify": "^1.0.1",
     "preact": "^10.27.0",
-    "preact-render-to-string": "^6.5.13"
+    "preact-render-to-string": "^6.5.13",
+    "stacktrace-parser": "^0.1.11"
   },
   "devDependencies": {
     "isoq": "link:.",
