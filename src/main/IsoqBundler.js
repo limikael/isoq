@@ -147,12 +147,14 @@ export default class IsoqBundler {
 			chunkNames: "client.[hash]",
 			sourcemap: this.sourcemap?"inline":undefined,
 			sourceRoot: outdir,
+			//keepNames: true,
 			plugins: [
 				esbuildModuleAlias({
 					"preact": require.resolve("preact"),
 					"preact/compat": require.resolve("preact/compat"),
 					"preact/jsx-runtime": require.resolve("preact/jsx-runtime"),
 					"react": require.resolve("preact/compat"),
+					//"react-dom": require.resolve("preact/compat"),
 					//"react-dom": "preact/compat",
 					//"react/jsx-runtime": "preact/jsx-runtime"
 				})

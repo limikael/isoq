@@ -44,6 +44,8 @@ export function useRouteParams() {
 }
 
 export function Route({path, children}) {
+	//return children;
+
 	let routeValue=useContext(RouteContext);
 	let match=urlMatchPath(routeValue.url,path);
 	if (!match)

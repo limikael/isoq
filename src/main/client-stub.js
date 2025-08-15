@@ -7,7 +7,7 @@ export default `
 //
 
 import {IsoState, IsoContextProvider, IsoContext} from "isoq";
-import {hydrate, createElement} from "preact";
+import {hydrate, createElement, render} from "preact";
 import {renderToStringAsync} from "preact-render-to-string";
 
 $$IMPORTS$$
@@ -41,6 +41,7 @@ if (globalThis.window && globalThis.window.__iso) {
 
 	let element=<Element isoState={isoState}/>
 	hydrate(element,globalThis.window.document.getElementById("isoq"));
+	//render(element,globalThis.window.document.getElementById("isoq"));
 }
 
 /* SSR */

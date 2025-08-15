@@ -3,6 +3,7 @@ import {useEffect, useState} from "preact/hooks";
 import {useIsoContext} from "./IsoContext.jsx";
 
 export function DefaultErrorFallback({error}) {
+    let [showNoisy,setShowNoisy]=useState();
     let style={
         position: "fixed",
         left: "0",
@@ -19,17 +20,28 @@ export function DefaultErrorFallback({error}) {
         borderColor: "#ff0000",
         padding: "0.5em",
         boxSizing: "border-box",
-    }
+    };
+
+    let aStyle={
+        marginLeft: "40px", 
+        textDecoration: "underline",
+        cursor: "pointer",
+    };
 
     return (
         <div style={style}>
             <div>{String(error)}</div>
-            {error.stackFrames && error.stackFrames.filter(f=>!f.noisy).map(f=>
-                <div style={{marginLeft: "40px"}}>
-                    at {f.file}:{f.line}:{f.column}
-                    {f.name?` (in ${f.name})`:""}
-                </div>
-            )}
+            {error.stackFrames && <>
+                {error.stackFrames.filter(f=>(showNoisy || !f.noisy)).map(f=>
+                    <div style={{marginLeft: "40px"}}>
+                        at {f.file}:{f.line}:{f.column}
+                        {f.name?` (in ${f.name})`:""}
+                    </div>
+                )}
+                {!showNoisy && error.stackFrames.filter(f=>f.noisy).length>0 &&
+                    <a style={aStyle} onClick={()=>setShowNoisy(true)}>more...</a>
+                }
+            </>}
         </div>
     );
 }
@@ -60,16 +72,17 @@ class ErrorBoundary extends Component {
 
 export function IsoErrorBoundary({fallback, children}) {
     let [error,setError]=useState();
-    let [_,forceUpdate]=useState();
     let iso=useIsoContext();
 
     iso.errorFallback=fallback;
 
     async function handleError(e) {
-        setError(e);
+        let tmpError=new Error();
+        tmpError.name=e.name;
+        tmpError.message=e.message;
+        setError(tmpError);
         await iso.processError(e);
         setError(e);
-        forceUpdate({});
     }
 
     let Fallback=fallback;

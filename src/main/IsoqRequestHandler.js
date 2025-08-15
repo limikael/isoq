@@ -27,7 +27,8 @@ export default class IsoqRequestHandler {
 			url: u,
 			props: options.props,
 			localFetch: options.localFetch,
-			fs: this.fs
+			fs: this.fs,
+			request: request
 		});
 
 		let content,head="",scriptTag="";
@@ -38,6 +39,27 @@ export default class IsoqRequestHandler {
 			scriptTag=`<script type="module" src="/client.js"></script>`;
 			if (this.inlineBundle)
 				scriptTag=`<script>${this.clientSource}</script>`;
+
+			if (isoState.routerState.redirectUrl) {
+				let headers=new Headers();
+				headers.set("location",isoState.routerState.redirectUrl);
+				return new Response("Moved",{
+					status: 302,
+					headers: headers
+				});
+
+				// Todo... handle cookies...
+				/*if (routerState.redirectUrl) {
+					let headers=this.getCookieHeaders();
+					headers.set("location",routerState.redirectUrl);
+					this.response=new Response("Moved",{
+						status: 302,
+						headers: headers
+					});
+
+					return;
+				}*/
+			}
 		}
 
 		catch (error) {
