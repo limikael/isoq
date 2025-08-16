@@ -2,7 +2,7 @@
 	"type": "module",
 	"scripts": {
 		"preinstall": "echo 'not meant to be installed\n' && exit 1",
-		"build": "../../src/main/isoq.js --out request-handler.js index.jsx --contentdir public --tmpdir .target --source-root=. --sourcemap",
+		"build": "../../src/main/isoq.js --out request-handler.js index.jsx --source-root=. --sourcemap",
 		"dev": "pnpm build && node server.js"
 	}
 }

@@ -1,4 +1,4 @@
-import IsoqBundler from "./IsoqBundler.js";
+import IsoqBundler, {isoqGetEsbuildOptions} from "./IsoqBundler.js";
 import path from "node:path";
 import {fileURLToPath} from "url";
 import {createRequire} from "node:module";
@@ -12,7 +12,9 @@ export async function isoqBundle(options) {
 	await bundler.bundle();
 }
 
-export async function isoqGetEsbuildOptions(conf) {
+export {isoqGetEsbuildOptions};
+
+/*export async function isoqGetEsbuildOptions(conf) {
 	return ({
 		format: "esm",
 		jsx: 'automatic',
@@ -29,4 +31,4 @@ export async function isoqGetEsbuildOptions(conf) {
 		],
 		bundle: true
 	});
-}
+}*/

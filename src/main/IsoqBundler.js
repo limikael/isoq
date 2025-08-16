@@ -13,6 +13,29 @@ import {esbuildModuleAlias} from "../utils/esbuild-util.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
+export function isoqGetEsbuildOptions(conf={}) {
+	let isoqPath=path.resolve(__dirname,"../..");
+	let preactPath=path.dirname(require.resolve("preact/package.json"));
+	let preactRenderToStringPath=path.dirname(require.resolve("preact-render-to-string/package.json"));
+
+	return ({
+		format: "esm",
+		bundle: true,
+		jsx: 'automatic',
+		jsxImportSource: 'preact',
+		plugins: [
+			esbuildModuleAlias({
+				"isoq/*": isoqPath,
+				"preact/*": preactPath,
+				"preact-render-to-string": preactRenderToStringPath,
+				"react": "preact/compat",
+				"react-dom": "preact/compat",
+				"react/jsx-runtime": "preact/jsx-runtime",
+			})
+		]
+	})
+}
+
 export default class IsoqBundler {
 	constructor({out, tmpdir, entrypoint, inlineBundle, wrappers, 
 			minify, quiet, contentdir, splitting, purgeOldJs,
@@ -97,20 +120,6 @@ export default class IsoqBundler {
 
 		s=replaceFromSubstring(s,"/* SSR */","");
 		await fsp.writeFile(path.join(this.tmpdir,"client.jsx"),s);
-
-		await fsp.rm(path.join(this.tmpdir,"node_modules"),{recursive: true, force: true});
-		await fsp.mkdir(path.join(this.tmpdir,"node_modules"));
-
-		//await this.symlinkDep("preact");
-		await this.symlinkDep("preact-render-to-string");
-
-		let isoqDir=path.resolve(__dirname,"../..");
-		await fsp.symlink(isoqDir,path.join(this.tmpdir,"node_modules/isoq"),"dir");
-	}
-
-	async symlinkDep(dep) {
-		let dir=path.dirname(require.resolve(dep+"/package.json"));
-		await fsp.symlink(dir,path.join(this.tmpdir,"node_modules",dep),"dir");
 	}
 
 	async bundle() {
@@ -136,9 +145,8 @@ export default class IsoqBundler {
 		}
 
 		await esbuild.build({
+			...isoqGetEsbuildOptions(),
 			format: "esm",
-			jsx: 'automatic',
-			jsxImportSource: 'preact',
 			entryPoints: entryPoints,
 			outdir: outdir,
 			bundle: true,
@@ -147,18 +155,6 @@ export default class IsoqBundler {
 			chunkNames: "client.[hash]",
 			sourcemap: this.sourcemap?"inline":undefined,
 			sourceRoot: outdir,
-			//keepNames: true,
-			plugins: [
-				esbuildModuleAlias({
-					"preact": require.resolve("preact"),
-					"preact/compat": require.resolve("preact/compat"),
-					"preact/jsx-runtime": require.resolve("preact/jsx-runtime"),
-					"react": require.resolve("preact/compat"),
-					//"react-dom": require.resolve("preact/compat"),
-					//"react-dom": "preact/compat",
-					//"react/jsx-runtime": "preact/jsx-runtime"
-				})
-			]
 		});
 
 		let serverSource=SERVER_STUB;

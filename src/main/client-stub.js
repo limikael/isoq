@@ -9,6 +9,7 @@ export default `
 import {IsoState, IsoContextProvider, IsoContext} from "isoq";
 import {hydrate, createElement, render} from "preact";
 import {renderToStringAsync} from "preact-render-to-string";
+//console.log(renderToStringAsync);
 
 $$IMPORTS$$
 
