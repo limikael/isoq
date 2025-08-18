@@ -2,9 +2,15 @@
 
 import {program} from "commander";
 import {isoqBundle} from "./isoq-commands.js";
+import {getPackageVersion} from "../utils/node-util.js";
+import path from "node:path";
+import {fileURLToPath} from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 program.name("isoq")
 	.description("Minimal isomorphic middleware generator.")
+	.option("--version","Print version.")
 	.option("--out <out>","The output middleware file.")
     .option("--contentdir <contentdir>","Generate content in this directory. Will require your own middleware to serve the content.")
 	.option("--tmpdir <tmpdir>","Directory where to store temporary files.")
@@ -14,9 +20,13 @@ program.name("isoq")
     .option("--no-minify","Don't minify.")
     .option("--purge-old-js","Purge old javascript files from previous builds.")
 	.option("--inline-bundle","Inline the bundle in the script tag rather than loading it.")
-
 	.argument("[entrypoint]","Path to entrypoint.")
 	.action(async (entrypoint, options)=>{
+		if (options.version) {
+			console.log(await getPackageVersion(__dirname));
+			return;
+		}
+
 		if (!entrypoint) {
 			program.help();
 			return;
