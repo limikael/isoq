@@ -25,7 +25,7 @@ export default function({hello}) {
 		</IsoErrorBoundary>*/
 
 	return (<>
-			ref: {ref.current}
+			some ref: {ref.current}
 			hello: {hello}
 			<div>
 				<Link href="/pageone">One</Link>

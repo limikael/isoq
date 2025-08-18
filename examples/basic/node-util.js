@@ -7,6 +7,7 @@ export async function createStaticResponse({request, cwd}) {
     let assetAbs=path.join(cwd,url.pathname);
     if (fs.existsSync(assetAbs) &&
             fs.statSync(assetAbs).isFile()) {
+        console.log("serving static: "+assetAbs);
 
         let stat=fs.statSync(assetAbs);        
 

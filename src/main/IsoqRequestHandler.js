@@ -14,7 +14,7 @@ export default class IsoqRequestHandler {
 			return new Response("");
 		}
 
-		if (u.pathname=="/client.js" &&
+		if (u.pathname=="/client-bundle.js" &&
 				this.clientSource) {
 			return new Response(this.clientSource,{
 				headers: new Headers({
@@ -39,6 +39,9 @@ export default class IsoqRequestHandler {
 			scriptTag=`<script type="module" src="/client.js"></script>`;
 			if (this.inlineBundle)
 				scriptTag=`<script>${this.clientSource}</script>`;
+
+			else if (this.clientSource)
+				scriptTag=`<script type="module" src="/client-bundle.js"></script>`;
 
 			if (isoState.routerState.redirectUrl) {
 				let headers=new Headers();

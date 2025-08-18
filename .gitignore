@@ -5,3 +5,4 @@ public
 .wrangler
 pnpm-lock.yaml
 attic
+examples/basic/request-handler.js

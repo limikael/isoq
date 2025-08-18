@@ -6,6 +6,8 @@ import {createStaticResponse} from "./node-util.js";
 
 let listener=createNodeRequestListener(async request=>{
 	let staticResponse=await createStaticResponse({request, cwd: "public"});
+	//console.log(staticResponse);
+
 	if (staticResponse)
 		return staticResponse;
 

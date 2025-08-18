@@ -165,7 +165,11 @@ export default class IsoqBundler {
 			clientModuleSource=await fsp.readFile(path.join(outdir,"client.js"),"utf8");
 		serverSource=serverSource.replace("$$CLIENT_SOURCE$$",JSON.stringify(clientModuleSource));
 
-		serverSource=serverSource.replace("$$FS_IMPORT$$",`import fs from "fs";`);
+		if (this.sourcemap)
+			serverSource=serverSource.replace("$$FS_IMPORT$$",`import fs from "fs";`);
+
+		else
+			serverSource=serverSource.replace("$$FS_IMPORT$$",`let fs=null;`);
 
 		let isoqServerImport=path.resolve(__dirname,"../main/server-exports.js");
 		serverSource=serverSource.replace("$$ISOQ_SERVER$$",JSON.stringify(isoqServerImport));
