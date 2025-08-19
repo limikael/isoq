@@ -1,6 +1,8 @@
 import {useIsoRef, Link, Route, IsoErrorBoundary} from "isoq";
+import {useState} from "react";
 
 function Pageone() {
+	let [val,setVal]=useState();
 	return <div>This is page one</div>;
 }
 

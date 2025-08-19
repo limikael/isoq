@@ -88,10 +88,11 @@ export function esbuildModuleAlias(aliases) {
 
 					else if (aliasKey.endsWith("/*") &&
 							(ev.path.startsWith(aliasKey.slice(0,-1)) || ev.path==aliasKey.slice(0,-2))) {
+						//console.log("current plugindata: ",ev.pluginData);
 						resolved=await build.resolve(ev.path,{
 							resolveDir: aliases[aliasKey],
 							kind: "import-statement",
-							pluginData: {fromModulealias: true}
+							pluginData: {...ev.pluginData, fromModulealias: true}
 						});
 					}
 
@@ -99,7 +100,7 @@ export function esbuildModuleAlias(aliases) {
 				        if (resolved.errors.length>0)
 				            return {errors: resolved.errors}
 
-				        resolveResults[ev.path]={path: resolved.path};
+				        resolveResults[ev.path]=resolved; //{path: resolved.path, external: resolved.external};
 				        return resolveResults[ev.path];
 					}
 				}

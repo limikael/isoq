@@ -1,8 +1,9 @@
-import IsoqBundler, {isoqGetEsbuildOptions} from "./IsoqBundler.js";
+import IsoqBundler from "./IsoqBundler.js";
 import path from "node:path";
 import {fileURLToPath} from "url";
 import {createRequire} from "node:module";
 import {esbuildModuleAlias} from "../utils/esbuild-util.js";
+import {vendoredBuild} from "../utils/vendored-build.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -12,7 +13,7 @@ export async function isoqBundle(options) {
 	await bundler.bundle();
 }
 
-export {isoqGetEsbuildOptions};
+export {vendoredBuild};
 
 /*export async function isoqGetEsbuildOptions(conf) {
 	return ({

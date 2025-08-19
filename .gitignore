@@ -4,5 +4,8 @@ public
 .target
 .wrangler
 pnpm-lock.yaml
+pnpm-workspace.yaml
 attic
 examples/basic/request-handler.js
+lab/tmp
+lab/target

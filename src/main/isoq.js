@@ -20,6 +20,7 @@ program.name("isoq")
     .option("--no-minify","Don't minify.")
     .option("--purge-old-js","Purge old javascript files from previous builds.")
 	.option("--inline-bundle","Inline the bundle in the script tag rather than loading it.")
+	.option("--vendor","Create a separate vendor bundle for external imports.")
 	.argument("[entrypoint]","Path to entrypoint.")
 	.action(async (entrypoint, options)=>{
 		if (options.version) {

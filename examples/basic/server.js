@@ -11,7 +11,14 @@ let listener=createNodeRequestListener(async request=>{
 	if (staticResponse)
 		return staticResponse;
 
-	return requestHandler(request,{props: {hello: "world"}});
+	try {
+		return requestHandler(request,{props: {hello: "world"}});
+	}
+
+	catch (e) {
+		console.log(e);
+		throw e;
+	}
 });
 
 let server=http.createServer(listener);

@@ -9,37 +9,15 @@ import {fileURLToPath} from "url";
 import {createRequire} from "node:module";
 import {minimatch} from "minimatch";
 import {esbuildModuleAlias} from "../utils/esbuild-util.js";
+import {vendoredBuild} from "../utils/vendored-build.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
-export function isoqGetEsbuildOptions(conf={}) {
-	let isoqPath=path.resolve(__dirname,"../..");
-	let preactPath=path.dirname(require.resolve("preact/package.json"));
-	let preactRenderToStringPath=path.dirname(require.resolve("preact-render-to-string/package.json"));
-
-	return ({
-		format: "esm",
-		bundle: true,
-		jsx: 'automatic',
-		jsxImportSource: 'preact',
-		plugins: [
-			esbuildModuleAlias({
-				"isoq/*": isoqPath,
-				"preact/*": preactPath,
-				"preact-render-to-string": preactRenderToStringPath,
-				"react": "preact/compat",
-				"react-dom": "preact/compat",
-				"react/jsx-runtime": "preact/jsx-runtime",
-			})
-		]
-	})
-}
-
 export default class IsoqBundler {
 	constructor({out, tmpdir, entrypoint, inlineBundle, wrappers, 
 			minify, quiet, contentdir, splitting, purgeOldJs,
-			sourcemap, sourceRoot,
+			sourcemap, sourceRoot, vendor,
 			...more}={}) {
 		if (Object.keys(more).length)
 			throw new DeclaredError("Unknown options for IsoqBundler: "+Object.keys(more).join(","));
@@ -82,6 +60,7 @@ export default class IsoqBundler {
 			this.sourceRoot=path.resolve(sourceRoot);
 
 		this.sourcemap=sourcemap;
+		this.vendor=vendor;
 	}
 
 	async initTmpdir() {
@@ -144,12 +123,16 @@ export default class IsoqBundler {
 			}
 		}
 
-		await esbuild.build({
-			...isoqGetEsbuildOptions(),
-			format: "esm",
+		let isoqPath=path.resolve(__dirname,"../..");
+		let preactPath=path.dirname(require.resolve("preact/package.json"));
+		let preactRenderToStringPath=path.dirname(require.resolve("preact-render-to-string/package.json"));
+
+		await vendoredBuild({
+			preset: "preact",
+			vendor: this.vendor,
+			tmpdir: this.tmpdir,
 			entryPoints: entryPoints,
 			outdir: outdir,
-			bundle: true,
 			minify: this.minify,
 			splitting: this.splitting,
 			chunkNames: "client.[hash]",

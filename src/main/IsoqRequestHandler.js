@@ -66,6 +66,8 @@ export default class IsoqRequestHandler {
 		}
 
 		catch (error) {
+			console.log(error);
+
 			await isoState.processError(error);
 			content=await this.clientModule.ssrRenderError({isoState, error});
 		}
