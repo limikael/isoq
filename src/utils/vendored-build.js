@@ -5,6 +5,7 @@ import {readPackageUp, readPackageUpSync} from 'read-package-up';
 import {createRequire} from "node:module";
 import {fileURLToPath} from "url";
 import {esbuildModuleAlias} from "./esbuild-util.js";
+import {minimatch} from "minimatch";
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const require=createRequire(import.meta.url);
@@ -66,6 +67,9 @@ function collectVendors(vendorEsbuild) {
 
 				if (!vendorEsbuild.vendorPackages.includes(ev.path) &&
 						!vendorEsbuild.vendorCands.includes(pkg))
+					return;
+
+				if (vendorEsbuild.vendorExclude.includes(ev.path))
 					return;
 
 				if (!vendorEsbuild.vendorPackages.includes(ev.path)) {
@@ -155,7 +159,12 @@ export class VendorEsbuild {
 		if (preset)
 			args={...presets[preset],...args};
 
-		let {tmpdir, vendor, vendorPackages, vendorPlugins, vendorOptions, ...options}=args;
+		let {tmpdir, prune, vendor, vendorPackages, 
+				vendorPlugins, vendorOptions, vendorExclude, ...options}=args;
+
+		this.vendorExclude=vendorExclude;
+		if (!this.vendorExclude)
+			this.vendorExclude=[];
 
 		this.defaultVendorPackages=vendorPackages;
 		if (!this.defaultVendorPackages)
@@ -165,6 +174,7 @@ export class VendorEsbuild {
 		if (!this.vendorPlugins)
 			this.vendorPlugins=[]
 
+		this.prune=prune;
 		this.vendor=vendor;
 		this.tmpdir=tmpdir;
 		this.options=options;
@@ -194,6 +204,32 @@ export class VendorEsbuild {
 		}
 	}
 
+	async pruneOld(pruneVendor) {
+		if (!this.prune)
+			return;
+
+		if (!this.options.chunkNames || !this.options.outdir)
+			return;
+
+		//console.log("pruning, including vendor="+pruneVendor);
+
+		let fileNames=await fsp.readdir(this.options.outdir);
+		let pattern=this.options.chunkNames.replace("[hash]","*")+".js";
+		let promises=[];
+		for (let fileName of fileNames) {
+			if (minimatch(fileName,pattern)) {
+				if (fileName.includes("vendor") &&
+						!pruneVendor)
+					continue;
+
+				//console.log("pruning: "+fileName);
+				promises.push(fsp.rm(path.join(this.options.outdir,fileName)));
+			}
+		}
+
+		await Promise.all(promises);
+	}
+
 	getVendorPath(path, ext) {
 		let hash="vendor-"+path.replaceAll("/","-").replaceAll(".","-");
 
@@ -201,9 +237,14 @@ export class VendorEsbuild {
 	}
 
 	async build() {
+		await this.pruneOld(true);
+
 		if (!this.vendor) {
 			let options={...this.options};
 			options.plugins=[...this.options.plugins,...this.vendorPlugins];
+			if (options.outfile)
+				delete options.outdir;
+
 			await esbuild.build(options);
 			return;
 		}
@@ -271,6 +312,9 @@ export class VendorEsbuild {
 		if (!this.vendor) {
 			let options={...this.options};
 			options.plugins=[...this.options.plugins,...this.vendorPlugins];
+			if (options.outfile)
+				delete options.outdir;
+
 			this.buildContext=await esbuild.context(options);
 			return;
 		}
@@ -281,6 +325,8 @@ export class VendorEsbuild {
 	}
 
 	async rebuild() {
+		await this.pruneOld(!this.buildVendorDone);
+
 		this.vendorPackages=[...this.defaultVendorPackages];
 		await this.buildContext.rebuild();
 

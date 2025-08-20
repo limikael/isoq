@@ -7,7 +7,6 @@ import SERVER_STUB from "./server-stub.js";
 import esbuild from "esbuild";
 import {fileURLToPath} from "url";
 import {createRequire} from "node:module";
-import {minimatch} from "minimatch";
 import {esbuildModuleAlias} from "../utils/esbuild-util.js";
 import {vendoredBuild, vendoredContext} from "../utils/vendored-build.js";
 
@@ -16,8 +15,8 @@ const require = createRequire(import.meta.url);
 
 export default class IsoqBundler {
 	constructor({out, tmpdir, entrypoint, inlineBundle, wrappers, 
-			minify, quiet, contentdir, splitting, purgeOldJs,
-			sourcemap, sourceRoot, vendor,
+			minify, quiet, contentdir, splitting, prune,
+			sourcemap, sourceRoot, vendor, vendorExclude,
 			...more}={}) {
 		if (Object.keys(more).length)
 			throw new DeclaredError("Unknown options for IsoqBundler: "+Object.keys(more).join(","));
@@ -25,7 +24,6 @@ export default class IsoqBundler {
 		if (!out)
 			out="request-handler.js";
 
-		this.purgeOldJs=purgeOldJs;
 		this.quiet=quiet;
 		this.out=path.resolve(out);
 		this.entrypoint=path.resolve(entrypoint);
@@ -35,10 +33,14 @@ export default class IsoqBundler {
 
 		this.tmpdir=tmpdir;
 		this.inlineBundle=inlineBundle;
+		this.splitting=splitting;
 		this.minify=minify;
-
-		if (!this.minify===undefined)
+		if (this.minify===undefined)
 			this.minify=true;
+
+		this.prune=prune;
+		if (this.prune===undefined)
+			this.prune=true;
 
 		this.wrappers=wrappers;
 		if (!this.wrappers)
@@ -48,7 +50,13 @@ export default class IsoqBundler {
 			this.wrappers=this.wrappers.split(",");
 
 		this.wrappers=this.wrappers.map(w=>path.resolve(w));
-		this.splitting=splitting;
+
+		this.vendorExclude=vendorExclude;
+		if (!this.vendorExclude)
+			this.vendorExclude=[];
+
+		if (typeof this.vendorExclude=="string")
+			this.vendorExclude=this.vendorExclude.split(",");
 
 		if (this.inlineBundle && this.contentdir)
 			throw new DeclaredError("Can't use inlineBundle and contentdir at the same time.");
@@ -105,15 +113,6 @@ export default class IsoqBundler {
 			this.outdir=this.contentdir;
 
 		await fsp.mkdir(this.outdir,{recursive: true});
-
-		// this should be somewhere else completly...
-		/*if (this.purgeOldJs) {
-			let files=await fsp.readdir(this.contentdir);
-			for (let file of files) {
-				if (minimatch(file,"client.*.js"))
-					await fsp.rm(path.join(this.contentdir,file));
-			}
-		}*/
 	}
 
 	async bundle() {
@@ -132,6 +131,7 @@ export default class IsoqBundler {
 			entryPoints: entryPoints,
 			preset: "preact",
 			vendor: this.vendor,
+			vendorExclude: this.vendorExclude,
 			tmpdir: this.tmpdir,
 			outdir: this.outdir,
 			minify: this.minify,
@@ -139,6 +139,7 @@ export default class IsoqBundler {
 			chunkNames: "client.[hash]",
 			sourcemap: this.sourcemap?"inline":undefined,
 			sourceRoot: this.outdir,
+			prune: this.prune
 		});
 	}
 

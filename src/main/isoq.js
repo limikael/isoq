@@ -18,9 +18,10 @@ program.name("isoq")
     .option("--source-root <sourceRoot>","Show error stack traces relative to this dir.")
     .option("--sourcemap","Generate sourcemap and show formatted errors. Will make the app node work only under node.")
     .option("--no-minify","Don't minify.")
-    .option("--purge-old-js","Purge old javascript files from previous builds.")
+    .option("--no-prune","Don't remove old js chunks.")
 	.option("--inline-bundle","Inline the bundle in the script tag rather than loading it.")
 	.option("--vendor","Create a separate vendor bundle for external imports.")
+	.option("--vendor-exclude <vendorExclude>","Comma separated list of packages to exclude from vendoring.")
 	.argument("[entrypoint]","Path to entrypoint.")
 	.action(async (entrypoint, options)=>{
 		if (options.version) {
