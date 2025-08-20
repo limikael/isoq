@@ -284,10 +284,23 @@ export class VendorEsbuild {
 		this.vendorPackages=[...this.defaultVendorPackages];
 		await this.buildContext.rebuild();
 
+		if (this.vendor && this.buildVendorDone) {
+			//console.log("Reusing vendor build.");
+		}
+
 		if (this.vendor && !this.buildVendorDone) {
+			//console.log("Creating vendor build...");
 			await this.buildVendor();
 			this.buildVendorDone=true;
 		}
+	}
+
+	async dispose() {
+		if (!this.buildContext)
+			throw new Error("Can't dispose, no context running...");
+
+		await this.buildContext.dispose();
+		this.buildContext=undefined;
 	}
 }
 

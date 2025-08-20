@@ -9,7 +9,7 @@ import {fileURLToPath} from "url";
 import {createRequire} from "node:module";
 import {minimatch} from "minimatch";
 import {esbuildModuleAlias} from "../utils/esbuild-util.js";
-import {vendoredBuild} from "../utils/vendored-build.js";
+import {vendoredBuild, vendoredContext} from "../utils/vendored-build.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -99,55 +99,58 @@ export default class IsoqBundler {
 
 		s=replaceFromSubstring(s,"/* SSR */","");
 		await fsp.writeFile(path.join(this.tmpdir,"client.jsx"),s);
+
+		this.outdir=this.tmpdir;
+		if (this.contentdir)
+			this.outdir=this.contentdir;
+
+		await fsp.mkdir(this.outdir,{recursive: true});
+
+		// this should be somewhere else completly...
+		/*if (this.purgeOldJs) {
+			let files=await fsp.readdir(this.contentdir);
+			for (let file of files) {
+				if (minimatch(file,"client.*.js"))
+					await fsp.rm(path.join(this.contentdir,file));
+			}
+		}*/
 	}
 
 	async bundle() {
 		await this.initBundle();
+		await vendoredBuild(this.getBuildOptions());
+		await this.postBuild();
+	}
 
+	getBuildOptions() {
 		let entryPoints=[
 			path.join(this.tmpdir,"client.jsx"),
 			path.join(this.tmpdir,"client-ssr.jsx")
 		];
 
-		let outdir=this.tmpdir;
-		if (this.contentdir) {
-			await fsp.mkdir(this.contentdir,{recursive: true});
-			outdir=this.contentdir;
-
-			if (this.purgeOldJs) {
-				let files=await fsp.readdir(this.contentdir);
-				for (let file of files) {
-					if (minimatch(file,"client.*.js"))
-						await fsp.rm(path.join(this.contentdir,file));
-				}
-			}
-		}
-
-		let isoqPath=path.resolve(__dirname,"../..");
-		let preactPath=path.dirname(require.resolve("preact/package.json"));
-		let preactRenderToStringPath=path.dirname(require.resolve("preact-render-to-string/package.json"));
-
-		await vendoredBuild({
+		return ({
+			entryPoints: entryPoints,
 			preset: "preact",
 			vendor: this.vendor,
 			tmpdir: this.tmpdir,
-			entryPoints: entryPoints,
-			outdir: outdir,
+			outdir: this.outdir,
 			minify: this.minify,
 			splitting: this.splitting,
 			chunkNames: "client.[hash]",
 			sourcemap: this.sourcemap?"inline":undefined,
-			sourceRoot: outdir,
+			sourceRoot: this.outdir,
 		});
+	}
 
+	async postBuild() {
 		let serverSource=SERVER_STUB;
-		serverSource=serverSource.replace("$$CLIENT_MODULE$$",JSON.stringify(path.join(outdir,"client-ssr.js")));
+		serverSource=serverSource.replace("$$CLIENT_MODULE$$",JSON.stringify(path.join(this.outdir,"client-ssr.js")));
 
 		let clientModuleSource=null;
 		if (!this.contentdir)
-			clientModuleSource=await fsp.readFile(path.join(outdir,"client.js"),"utf8");
-		serverSource=serverSource.replace("$$CLIENT_SOURCE$$",JSON.stringify(clientModuleSource));
+			clientModuleSource=await fsp.readFile(path.join(this.outdir,"client.js"),"utf8");
 
+		serverSource=serverSource.replace("$$CLIENT_SOURCE$$",JSON.stringify(clientModuleSource));
 		if (this.sourcemap)
 			serverSource=serverSource.replace("$$FS_IMPORT$$",`import fs from "fs";`);
 
@@ -161,5 +164,29 @@ export default class IsoqBundler {
 		}));
 
 		await fsp.writeFile(this.out,serverSource);
+	}
+
+	async createContext() {
+		if (this.buildContext)
+			throw new Error("Build context already created");
+
+		await this.initBundle();
+		this.buildContext=await vendoredContext(this.getBuildOptions());
+	}
+
+	async rebuild() {
+		if (!this.buildContext)
+			throw new Error("Build context not initialized");
+
+		await this.buildContext.rebuild();
+		await this.postBuild();
+	}
+
+	async dispose() {
+		if (!this.buildContext)
+			throw new Error("Can't dispose, no context running...");
+
+		await this.buildContext.dispose();
+		this.buildContext=undefined;
 	}
 }

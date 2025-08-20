@@ -107,5 +107,9 @@ describe("vendored build",()=>{
 		let mod=await import(path.join(projectDir,"target/hello.js"));
 		expect(mod.match('bar.foo', '*.foo')).toEqual(true);
 		expect(mod.match('bar.foo', '*.bar')).toEqual(false);
+
+		await context.rebuild();
+
+		await context.dispose();
 	});
 });

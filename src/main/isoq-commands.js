@@ -3,7 +3,7 @@ import path from "node:path";
 import {fileURLToPath} from "url";
 import {createRequire} from "node:module";
 import {esbuildModuleAlias} from "../utils/esbuild-util.js";
-import {vendoredBuild} from "../utils/vendored-build.js";
+import {vendoredBuild, vendoredContext} from "../utils/vendored-build.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -13,23 +13,10 @@ export async function isoqBundle(options) {
 	await bundler.bundle();
 }
 
-export {vendoredBuild};
+export async function isoqContext(options) {
+	let bundler=new IsoqBundler(options);
+	await bundler.createContext();
+	return bundler;
+}
 
-/*export async function isoqGetEsbuildOptions(conf) {
-	return ({
-		format: "esm",
-		jsx: 'automatic',
-		jsxImportSource: 'preact',
-		plugins: [
-			esbuildModuleAlias({
-				"preact": require.resolve("preact"),
-				"preact/compat": require.resolve("preact/compat"),
-				"preact/jsx-runtime": require.resolve("preact/jsx-runtime"),
-				"react": require.resolve("preact/compat"),
-				//"react-dom": "preact/compat",
-				//"react/jsx-runtime": "preact/jsx-runtime"
-			})
-		],
-		bundle: true
-	});
-}*/
+export {vendoredBuild, vendoredContext};
