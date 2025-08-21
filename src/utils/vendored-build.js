@@ -69,10 +69,15 @@ function collectVendors(vendorEsbuild) {
 						!vendorEsbuild.vendorCands.includes(pkg))
 					return;
 
-				if (vendorEsbuild.vendorExclude.includes(ev.path))
-					return;
-
 				if (!vendorEsbuild.vendorPackages.includes(ev.path)) {
+					for (let exclude of vendorEsbuild.vendorExclude) {
+						if (exclude==ev.path ||
+								ev.path.startsWith(exclude+"/")) {
+							//console.log("exclude: "+ev.path);
+							return;
+						}
+					}
+
 					/*if (!isEsm(ev.path,vendorEsbuild.options.entryPoints))
 						return;*/
 

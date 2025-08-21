@@ -49,7 +49,8 @@ export default class IsoqBundler {
 		if (typeof this.wrappers=="string")
 			this.wrappers=this.wrappers.split(",");
 
-		this.wrappers=this.wrappers.map(w=>path.resolve(w));
+		//Nope, don't resolve...
+		//this.wrappers=this.wrappers.map(w=>path.resolve(w));
 
 		this.vendorExclude=vendorExclude;
 		if (!this.vendorExclude)
