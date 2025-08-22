@@ -3,7 +3,8 @@
   "version": "2.0.2",
   "description": "",
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine",
+    "doc": "documentation build src/components/*.jsx -o API.md --format md --markdown-toc-max-depth 2 --sort-order alpha && markserv ."
   },
   "bin": {
     "isoq": "src/main/isoq.js"
@@ -26,9 +27,11 @@
     "stacktrace-parser": "^0.1.11"
   },
   "devDependencies": {
+    "documentation": "^14.0.3",
     "isoq": "link:.",
     "jasmine": "^5.9.0",
     "jsdom": "^26.1.0",
+    "markserv": "^1.17.4",
     "mime": "^4.0.7",
     "serve-fetch": "^1.0.5"
   },

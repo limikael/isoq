@@ -3,6 +3,27 @@ import {useIsoContext} from "./IsoContext.jsx";
 import {useLoadingState} from "./useIsLoading.jsx";
 import {useIsoRef} from "./iso-ref.js";
 
+/**
+ * An isomorphic memoization hook for asynchronous computations. The value returned by `asyncFn` 
+ * is generated on the server during SSR and immediately available on the client, avoiding extra fetches.
+ * 
+ * On the client, `asyncFn` is "debounced" in the sense that only one active call will be in-flight 
+ * at any given time. If the hook is called again while a previous call is still pending, it will 
+ * return the last known value until the new result arrives.
+ *
+ * Note: The returned value must be serializable (plain objects, arrays, primitives), 
+ * not class instances or functions.
+ *
+ * @param {() => Promise<any>} asyncFn - The asynchronous function whose result should be memoized.
+ * @param {Array<any>} [deps=[]] - Dependency array; the function re-runs whenever any dependency changes.
+ * @param {Object} [options={}] - Optional settings.
+ * @param {boolean} [options.shared=true] - Whether the memoized value is shared across all clients.
+ * @param {boolean} [options.swr=false] - Enables Stale-While-Refresh: returns the old value immediately 
+ *                                        while fetching the new one in the background.
+ * @returns {any} - The memoized value, automatically synchronized between server and client.
+ *
+ */
+useIsoMemo(asyncFn, deps=[], options={})
 export function useIsoMemo(asyncFn, deps=[], options={}) {
     let loadingState=useLoadingState();
     let iso=useIsoContext();

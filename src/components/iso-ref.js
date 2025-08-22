@@ -121,7 +121,22 @@ export function IsoSuspense({children, fallback}) {
 	return createElement(Suspense,{fallback: createElement(FallbackWrapper)},children);
 }
 
-export function useIsoRef(initialValue, options={}) {
+/**
+ * Returns an isomorphic ref whose value is preserved from server to client.
+ *
+ * Isomorphic References let a component keep the same value on both the server and the client. 
+ * Unlike normal refs, which only exist on the client, an isomorphic ref is filled during server 
+ * rendering and automatically available when the page loads on the client. 
+ * This makes it easy to share data across environments without extra network calls. 
+ * Note: the value must be serializable—only plain JavaScript objects, arrays, and 
+ * primitives are supported, not class instances or functions.
+ *
+ * @param {*} initialValue - The initial value for the ref. Can be anything.
+ * @param {Object} [options={}] - Optional configuration object.
+ * @param {boolean} [options.shared=true] - Whether the value should actually be shared between server and client.
+ * @returns {{current: *}} A ref object whose `.current` value is preserved isomorphically.
+ */
+ export function useIsoRef(initialValue, options={}) {
 	if (typeof options=="boolean")
 		options={shared: options};
 
