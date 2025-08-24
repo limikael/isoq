@@ -101,6 +101,27 @@ export class IsoRefState {
 	}
 }
 
+/**
+ * `IsoSuspense` works like React’s built-in `Suspense`, but it is aware
+ * of isomorphic references created with {@link useIsoRef}.
+ *
+ * Normally, when a component suspends and React retries rendering,
+ * the local hook state may be reset. `IsoSuspense` ensures that
+ * `useIsoRef` values are preserved across suspends, so data passed
+ * from the server to the client is not lost during retry renders.
+ *
+ * You can wrap any async-loading components in `IsoSuspense`
+ * and provide a fallback UI, just like with normal `Suspense`.
+ *
+ * @param {object} props
+ * @param {React.ReactNode} props.fallback - What to show while waiting.
+ * @param {React.ReactNode} props.children - The UI subtree that may suspend.
+ *
+ * @example
+ * <IsoSuspense fallback={<div>Loading...</div>}>
+ *   <UserProfile />
+ * </IsoSuspense>
+ */
 export function IsoSuspense({children, fallback}) {
 	let isoRefState=useContext(IsoRefContext);
 	let refId=useRefId();

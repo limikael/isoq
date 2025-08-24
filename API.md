@@ -3,8 +3,18 @@
 ### Table of Contents
 
 *   [Head][1]
-*   [useIsoMemo][2]
-*   [useIsoRef][3]
+*   [IsoSuspense][2]
+*   [Link][3]
+*   [Route][4]
+*   [useIsLoading][5]
+*   [useIsoFetch][6]
+*   [useIsoMemo][7]
+*   [useIsoRef][8]
+*   [useIsSsr][9]
+*   [useRedirect][10]
+*   [useRouteArgs][11]
+*   [useRouteLocation][12]
+*   [useRouteParams][13]
 
 ## Head
 
@@ -18,7 +28,7 @@ Note: The children should be valid head elements and serializable for SSR if use
 
 ### Parameters
 
-*   `props` **[Object][4]** Component props.
+*   `props` **[Object][14]** Component props.
 
     *   `props.children` **React.ReactNode** Elements to insert inside the document `<head>`.
 
@@ -32,6 +42,167 @@ Note: The children should be valid head elements and serializable for SSR if use
 ```
 
 Returns **JSX.Element** A React component that performs a side effect by modifying the document head.
+
+## IsoSuspense
+
+`IsoSuspense` works like React’s built-in `Suspense`, but it is aware
+of isomorphic references created with [useIsoRef][8].
+
+Normally, when a component suspends and React retries rendering,
+the local hook state may be reset. `IsoSuspense` ensures that
+`useIsoRef` values are preserved across suspends, so data passed
+from the server to the client is not lost during retry renders.
+
+You can wrap any async-loading components in `IsoSuspense`
+and provide a fallback UI, just like with normal `Suspense`.
+
+### Parameters
+
+*   `props` **[object][14]**&#x20;
+
+    *   `props.children` **React.ReactNode** The UI subtree that may suspend.
+    *   `props.fallback` **React.ReactNode** What to show while waiting.
+
+### Examples
+
+```javascript
+<IsoSuspense fallback={<div>Loading...</div>}>
+  <UserProfile />
+</IsoSuspense>
+```
+
+## Link
+
+A navigation component that behaves like a standard `<a>` element,
+but intercepts clicks on **local links** (within the same site) to
+prevent a full page reload.
+
+This allows client-side navigation while still falling back to
+default browser behavior for external URLs.
+
+### Parameters
+
+*   `props` **[Object][14]**&#x20;
+
+    *   `props.href` **[string][15]** The URL to navigate to.
+    *   `props.to` **[string][15]** Alias for href.
+    *   `props.props` **[Object][14]?** Any other props are passed directly to the underlying `<a>`.
+    *   `props.children` **React.ReactNode** The link text or elements.
+
+### Examples
+
+```javascript
+// Navigate internally without reloading the page
+<Link href="/about">About Us</Link>
+```
+
+```javascript
+// External link behaves like a normal <a>
+<Link href="https://example.com">External Site</Link>
+```
+
+Returns **JSX.Element** A link element with client-side navigation for local URLs.
+
+## Route
+
+`Route` conditionally renders its children based on the current URL path.
+
+The `path` prop can include wildcards:
+
+*   `*` matches a single path segment.
+*   `**` matches any number of trailing segments.
+
+When navigation happens via [Link][3], if the target route suspends,
+the current `Route` will remain visible until the new route is ready.
+This avoids showing a blank screen during page transitions.
+
+### Parameters
+
+*   `props` **[object][14]**&#x20;
+
+    *   `props.path` **[string][15]** The path pattern to match (supports `*` and `**`).
+    *   `props.children` **React.ReactNode** The UI to render when the path matches.
+
+### Examples
+
+```javascript
+<Route path="/about">
+  <AboutPage />
+</Route>
+
+<Route path="/blog/*">
+  <BlogPost />
+</Route>
+
+<Route path="/docs/**">
+  <Docs />
+</Route>
+```
+
+## useIsLoading
+
+`useIsoLoading` is a hook that tells you whether there are any
+asynchronous operations currently pending during isomorphic rendering.
+
+It returns `true` if the app is waiting on a Suspense boundary or
+an async computation from `useIsoMemo`. Otherwise, it returns `false`.
+
+This can be useful for rendering global indicators (like a loading bar
+or spinner) while parts of the UI are still resolving data.
+
+### Examples
+
+```javascript
+function LoadingIndicator() {
+  const isLoading = useIsoLoading();
+
+  return isLoading ? <div className="spinner" /> : null;
+}
+```
+
+Returns **[boolean][16]** Whether there are active loading operations.
+
+## useIsoFetch
+
+`useIsoFetch` returns a function that behaves like the standard
+`fetch`, but with special handling for server-side environments.
+
+On the client, it is simply an alias for the global `fetch`.
+
+On the server:
+
+*   For **same-origin requests**, it will directly call into the
+    current server’s request handler instead of sending an HTTP request.
+    This avoids issues in environments like Cloudflare Workers,
+    where a worker cannot make a network request to itself.
+*   For **cross-origin requests**, it falls back to the normal `fetch`.
+
+Unlike the built-in `fetch`, this function also supports using
+**origin-relative URLs** such as `/api/users/123`. These will resolve
+correctly against the application’s origin in both server and client
+environments.
+
+From the programmer’s perspective, you can use it just like `fetch`,
+without needing to worry about whether the code runs on the client,
+the server, or under special hosting restrictions.
+
+### Examples
+
+```javascript
+function UserProfile({ id }) {
+  const isoFetch = useIsoFetch();
+
+  async function load() {
+    const res = await isoFetch(`/api/users/${id}`);
+    const user = await res.json();
+    console.log(user.name);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  return <div>Loading user...</div>;
+}
+```
 
 ## useIsoMemo
 
@@ -47,11 +218,12 @@ not class instances or functions.
 
 ### Parameters
 
-*   `deps` **[Array][5]\<any>** Dependency array; the function re-runs whenever any dependency changes. (optional, default `[]`)
-*   `options` **[Object][4]** Optional settings. (optional, default `{}`)
+*   `asyncFn` **[Function][17]** The asynchronous function whose result should be memoized.
+*   `deps` **[Array][18]\<any>** Dependency array; the function re-runs whenever any dependency changes. (optional, default `[]`)
+*   `options` **[Object][14]** Optional settings. (optional, default `{}`)
 
-    *   `options.shared` **[boolean][6]** Whether the memoized value is shared across all clients. (optional, default `true`)
-    *   `options.swr` **[boolean][6]** Enables Stale-While-Refresh: returns the old value immediately
+    *   `options.shared` **[boolean][16]** Whether the memoized value is shared across all clients. (optional, default `true`)
+    *   `options.swr` **[boolean][16]** Enables Stale-While-Refresh: returns the old value immediately
         while fetching the new one in the background. (optional, default `false`)
 
 Returns **any** The memoized value, automatically synchronized between server and client.
@@ -70,20 +242,177 @@ primitives are supported, not class instances or functions.
 ### Parameters
 
 *   `initialValue` **any** The initial value for the ref. Can be anything.
-*   `options` **[Object][4]** Optional configuration object. (optional, default `{}`)
+*   `options` **[Object][14]** Optional configuration object. (optional, default `{}`)
 
-    *   `options.shared` **[boolean][6]** Whether the value should actually be shared between server and client. (optional, default `true`)
+    *   `options.shared` **[boolean][16]** Whether the value should actually be shared between server and client. (optional, default `true`)
 
 Returns **{current: any}** A ref object whose `.current` value is preserved isomorphically.
 
+## useIsSsr
+
+`useIsSsr` tells you whether the current render is happening on the server.
+
+This is useful if you need to branch logic between server-side rendering (SSR)
+and client-side rendering. For example, you might want to avoid using
+browser-only APIs during SSR.
+
+### Examples
+
+```javascript
+function PlatformInfo() {
+  const isSsr = useIsSsr();
+  return <div>{isSsr ? "Server render" : "Client render"}</div>;
+}
+```
+
+Returns **[boolean][16]** `true` if rendering on the server, otherwise `false`.
+
+## useRedirect
+
+`useRedirect` provides a function for programmatic navigation.
+
+It works like using a [Link][3], but instead of rendering a link,
+you call the returned function directly to change the URL.
+
+This is useful for cases where navigation should happen in response
+to an event (such as after form submission or button click) rather
+than through a visible link.
+
+When called, the function will update the current URL and trigger
+route matching. If the target route suspends, the current page will
+remain visible until the new one is ready (the same behavior as with `Link`).
+
+### Examples
+
+```javascript
+function LoginForm() {
+  const redirect = useRedirect();
+
+  async function handleLogin() {
+    await loginUser();
+    redirect("/dashboard");
+  }
+
+  return <button onClick={handleLogin}>Login</button>;
+}
+```
+
+## useRouteArgs
+
+`useRouteArgs` returns the dynamic arguments captured by wildcards
+in the current route’s `path`.
+
+For example, with a route path of `/blog/*` and a URL of `/blog/hello`,
+`useRouteArgs()` will return `["hello"]`.
+
+With `/docs/**` and `/docs/guides/setup/install`, it will return
+`["guides", "setup", "install"]`.
+
+This is useful for building dynamic pages without needing a full
+parameterized router.
+
+### Examples
+
+```javascript
+<Route path="/blog/*">
+  <BlogPost />
+</Route>
+
+function BlogPost() {
+  const [slug] = useRouteArgs();
+  return <div>Post slug: {slug}</div>;
+}
+```
+
+Returns **[Array][18]<[string][15]>** An array of matched wildcard segments.
+
+## useRouteLocation
+
+`useRouteLocation` is a hook that provides the current location,
+similar to `window.location`, but adapted for isomorphic navigation.
+
+During a navigation triggered by [Link][3], React may keep rendering
+the previous page while the new page is still loading (for example,
+if the new route suspends). In this case:
+
+*   Components from the **old route** will continue to receive the
+    **previous location** value, so they remain consistent while still visible.
+*   Components in the **new route** will see the **new target location**
+    immediately, even if they are not yet fully rendered.
+
+This ensures that both the outgoing and incoming routes see a
+"sensible" location value, avoiding inconsistencies during
+transitions and loading states.
+
+### Examples
+
+```javascript
+function ShowPath() {
+  const location = useRouteLocation();
+  return <div>Current path: {location}</div>;
+}
+```
+
+Returns **[string][15]** The currently rendered url.
+
+## useRouteParams
+
+`useRouteParams` is a convenience hook for accessing query parameters
+from the current URL.
+
+Internally it calls [useRouteLocation][12], then parses the
+query string and returns all parameters as an object.
+
+### Examples
+
+```javascript
+// For /search?q=react&page=2
+function SearchPage() {
+  const params = useRouteParams();
+  return (
+    <div>
+      Searching for: {params.q}, page {params.page}
+    </div>
+  );
+}
+```
+
+Returns **[Object][14]<[string][15], [string][15]>** An object mapping query parameter
+names to values. If a parameter appears multiple times, only the
+last value is returned.
+
 [1]: #head
 
-[2]: #useisomemo
+[2]: #isosuspense
 
-[3]: #useisoref
+[3]: #link
 
-[4]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[4]: #route
 
-[5]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[5]: #useisloading
 
-[6]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[6]: #useisofetch
+
+[7]: #useisomemo
+
+[8]: #useisoref
+
+[9]: #useisssr
+
+[10]: #useredirect
+
+[11]: #userouteargs
+
+[12]: #useroutelocation
+
+[13]: #userouteparams
+
+[14]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+
+[15]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[16]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[17]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+
+[18]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array

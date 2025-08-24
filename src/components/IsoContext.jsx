@@ -82,6 +82,71 @@ export function useIsoContext() {
 	return useContext(IsoContext);
 }
 
+/**
+ * `useIsSsr` tells you whether the current render is happening on the server.
+ *
+ * This is useful if you need to branch logic between server-side rendering (SSR)
+ * and client-side rendering. For example, you might want to avoid using
+ * browser-only APIs during SSR.
+ *
+ * @returns {boolean} `true` if rendering on the server, otherwise `false`.
+ *
+ * @example
+ * function PlatformInfo() {
+ *   const isSsr = useIsSsr();
+ *   return <div>{isSsr ? "Server render" : "Client render"}</div>;
+ * }
+ */
+export function useIsSsr() {
+	let iso=useIsoContext();
+	return iso.isSsr();
+}
+
+/**
+ * `useIsoFetch` returns a function that behaves like the standard
+ * `fetch`, but with special handling for server-side environments.
+ *
+ * On the client, it is simply an alias for the global `fetch`.
+ *
+ * On the server:
+ * - For **same-origin requests**, it will directly call into the
+ *   current server’s request handler instead of sending an HTTP request.
+ *   This avoids issues in environments like Cloudflare Workers,
+ *   where a worker cannot make a network request to itself.
+ * - For **cross-origin requests**, it falls back to the normal `fetch`.
+ *
+ * Unlike the built-in `fetch`, this function also supports using
+ * **origin-relative URLs** such as `/api/users/123`. These will resolve
+ * correctly against the application’s origin in both server and client
+ * environments.
+ *
+ * From the programmer’s perspective, you can use it just like `fetch`,
+ * without needing to worry about whether the code runs on the client,
+ * the server, or under special hosting restrictions.
+ *
+ * @returns {(input: RequestInfo, init?: RequestInit) => Promise<Response>}
+ *   A fetch-compatible function.
+ *
+ * @example
+ * function UserProfile({ id }) {
+ *   const isoFetch = useIsoFetch();
+ *
+ *   async function load() {
+ *     const res = await isoFetch(`/api/users/${id}`);
+ *     const user = await res.json();
+ *     console.log(user.name);
+ *   }
+ *
+ *   useEffect(() => { load(); }, []);
+ *
+ *   return <div>Loading user...</div>;
+ * }
+ */
+export function useIsoFetch() {
+	let iso=useIsoContext();
+	return iso.isSsr();
+}
+
 export function IsoContextProvider({isoState, children}) {
 	/*return (
 		<IsoContext.Provider value={isoState}>

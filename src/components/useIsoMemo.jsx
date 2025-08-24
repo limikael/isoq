@@ -14,7 +14,7 @@ import {useIsoRef} from "./iso-ref.js";
  * Note: The returned value must be serializable (plain objects, arrays, primitives), 
  * not class instances or functions.
  *
- * @param {() => Promise<any>} asyncFn - The asynchronous function whose result should be memoized.
+ * @param {Function} asyncFn - The asynchronous function whose result should be memoized.
  * @param {Array<any>} [deps=[]] - Dependency array; the function re-runs whenever any dependency changes.
  * @param {Object} [options={}] - Optional settings.
  * @param {boolean} [options.shared=true] - Whether the memoized value is shared across all clients.
