@@ -35,7 +35,8 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
         deps: undefined,
     },{shared: options.shared});
 
-    //console.log("ref: ",ref);
+    //console.log("ref: ",ref,"ref status=",ref.current.status);
+    /*console.log("ref.current: ",ref.current);*/
 
     let localRef=useIsoRef({
         promise: null,
@@ -56,11 +57,11 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
     localRef.current.fn=asyncFn;
 
     deps=JSON.stringify(deps);
-    //console.log("deps: "+deps);
+    //console.log("render... status=",ref.current.status);
 
     let depsChanged = ref.current.deps === undefined || ref.current.deps!=deps;
 
-    if (depsChanged) {
+    if (depsChanged /*&& ref.status!="error"*/) {
         if (iso.hydration) {
             console.log("yep, hydration");
             // Skip execution on hydration; trigger re-render post hydration
@@ -87,13 +88,15 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
                         forceUpdate({});
                 })
                 .catch(err => {
-                    console.log("caught...");
+                    //console.log("caught error...");
                     ref.current.error = err;
                     ref.current.status = "error";
                 })
                 .finally(()=>{
-                    if (localRef.current.pendingNextRun)
+                    if (localRef.current.pendingNextRun) {
+                        //console.log("running pending...");
                         run();
+                    }
 
                     else
                         loadingState.updateCount(-1);
@@ -116,6 +119,7 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
     }
 
     if (ref.current.status === "error") {
+        //console.log("it s error, throwing...");
         throw ref.current.error;
     }
 

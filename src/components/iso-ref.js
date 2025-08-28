@@ -68,7 +68,8 @@ export class IsoRefState {
 		if (this.sweepBlockIds.length)
 			return;
 
-		//console.log("sweeping");
+		return;
+		console.log("sweeping");
 		for (let id in this.refs) {
 			let ref=this.refs[id];
 			//console.log("ref "+id+": "+ref.ids.join(","));
