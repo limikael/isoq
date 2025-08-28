@@ -23,7 +23,6 @@ import {useIsoRef} from "./iso-ref.js";
  * @returns {any} - The memoized value, automatically synchronized between server and client.
  *
  */
-useIsoMemo(asyncFn, deps=[], options={})
 export function useIsoMemo(asyncFn, deps=[], options={}) {
     let loadingState=useLoadingState();
     let iso=useIsoContext();
