@@ -41,8 +41,9 @@ if (globalThis.window && globalThis.window.__iso) {
 	});
 
 	let element=<Element isoState={isoState}/>
+	isoState.hydration=true;
 	hydrate(element,globalThis.window.document.getElementById("isoq"));
-	//render(element,globalThis.window.document.getElementById("isoq"));
+	isoState.hydration=false;
 }
 
 /* SSR */

@@ -1,5 +1,11 @@
-import {useIsoRef, Link, Route, IsoErrorBoundary} from "isoq";
+import {useIsoRef, Link, Route, IsoErrorBoundary, useIsoMemo} from "isoq";
 import {useState} from "react";
+
+class Hello {
+	constructor({hello}) {
+		this.hello=hello+"hydrated";
+	}
+}
 
 function Pageone() {
 	let [val,setVal]=useState();
@@ -7,8 +13,15 @@ function Pageone() {
 }
 
 function Pagetwo() {
-	throw new Error("this is an error...");
-	return <div>This is page two</div>;
+	let val=useIsoMemo(async()=>{
+		console.log("running func");
+		return {hello: "hello"};
+	},[],{
+		hydrate: v=>{console.log("running hydrate func"); return new Hello(v)}
+	});
+
+	//throw new Error("this is an error...");
+	return <div>This is page, val={val.hello}</div>;
 }
 
 function ErrorFallback({error}) {

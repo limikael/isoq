@@ -20,6 +20,11 @@ import {useIsoRef} from "./iso-ref.js";
  * @param {boolean} [options.shared=true] - Whether the memoized value is shared across all clients.
  * @param {boolean} [options.swr=false] - Enables Stale-While-Refresh: returns the old value immediately 
  *                                        while fetching the new one in the background.
+ * @param {Function} [options.hydrate] - Optional post-processing function. Receives the memoized value
+ *                                       and returns a transformed result. `hydrate` is executed on both
+ *                                       server and client, even when `asyncFn` itself is not re-run.
+ *                                       Useful for restoring prototypes, adding methods, or normalizing
+ *                                       data after deserialization.
  * @returns {any} - The memoized value, automatically synchronized between server and client.
  *
  */
@@ -28,6 +33,10 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
     let iso=useIsoContext();
     let [, forceUpdate]=useState({});
 
+    let hydrate=options.hydrate;
+    if (!hydrate)
+        hydrate=v=>v;
+
     let ref=useIsoRef({
         result: undefined,
         error: undefined,
@@ -35,13 +44,11 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
         deps: undefined,
     },{shared: options.shared});
 
-    //console.log("ref: ",ref,"ref status=",ref.current.status);
-    /*console.log("ref.current: ",ref.current);*/
-
     let localRef=useIsoRef({
         promise: null,
         pendingNextRun: false,
-        fn: undefined
+        fn: undefined,
+        hydratedResult: undefined
     },{shared: false});
 
     useLayoutEffect(()=>{
@@ -57,9 +64,11 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
     localRef.current.fn=asyncFn;
 
     deps=JSON.stringify(deps);
-    //console.log("render... status=",ref.current.status);
-
     let depsChanged = ref.current.deps === undefined || ref.current.deps!=deps;
+
+    if (!depsChanged && iso.hydration && !iso.isSsr()) {
+        localRef.current.hydratedResult=hydrate(ref.current.result);
+    }
 
     if (depsChanged /*&& ref.status!="error"*/) {
         if (iso.hydration) {
@@ -83,6 +92,7 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
                 localRef.current.promise=localRef.current.fn();
                 localRef.current.promise.then(result => {
                     ref.current.result = result;
+                    localRef.current.hydratedResult=hydrate(ref.current.result);
                     ref.current.status = "success";
                     if (localRef.mounted)
                         forceUpdate({});
@@ -112,7 +122,8 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
             if (options.swr===false)
                 return undefined;
 
-            return ref.current.result;
+            ///return ref.current.result;
+            return localRef.current.hydratedResult;
         }
 
         throw localRef.current.promise;
@@ -123,5 +134,6 @@ export function useIsoMemo(asyncFn, deps=[], options={}) {
         throw ref.current.error;
     }
 
-    return ref.current.result;
+    //return ref.current.result;
+    return localRef.current.hydratedResult;
 }

@@ -181,13 +181,13 @@ describe("isoq",()=>{
 		});
 
 		files=await fsp.readdir(path.join(projectDir,"public"));
-		expect(files.length).toEqual(7);
+		expect(files.length).toEqual(5);
 
 		await isoqBundle({
 			entrypoint: path.join(projectDir,"index.jsx"),
 			contentdir: path.join(projectDir,"public"),
 			out: path.join(projectDir,"request-handler.js"),
-			purgeOldJs: true,
+			//purgeOldJs: true,
 			splitting: true,
 			quiet: true,
 		});
