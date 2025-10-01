@@ -1,6 +1,6 @@
 {
   "name": "isoq",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "",
   "scripts": {
     "test": "jasmine",
@@ -23,7 +23,6 @@
     "preact": "^10.27.0",
     "preact-render-to-string": "^6.5.13",
     "read-package-up": "^11.0.0",
-    "something-using-preact": "link:../../Repo.lab/something-using-preact",
     "stacktrace-parser": "^0.1.11"
   },
   "devDependencies": {
