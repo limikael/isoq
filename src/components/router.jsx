@@ -218,12 +218,16 @@ export class RouterState extends EventTarget {
 	}
 
 	postNavScroll() {
+		console.log("post nav scroll...");
+
 		let win=globalThis.window;
 		let u=new URL(this.committedUrl);
 		let el;
 
 		if (u.hash) {
 			let hash=u.hash.replace("#","");
+			el=win.document.getElementById(hash);
+
 			let els=win.document.getElementsByName(hash);
 			if (els.length)
 				el=els[0];

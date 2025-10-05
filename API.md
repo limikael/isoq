@@ -225,6 +225,11 @@ not class instances or functions.
     *   `options.shared` **[boolean][16]** Whether the memoized value is shared across all clients. (optional, default `true`)
     *   `options.swr` **[boolean][16]** Enables Stale-While-Refresh: returns the old value immediately
         while fetching the new one in the background. (optional, default `false`)
+    *   `options.hydrate` **[Function][17]?** Optional post-processing function. Receives the memoized value
+        and returns a transformed result. `hydrate` is executed on both
+        server and client, even when `asyncFn` itself is not re-run.
+        Useful for restoring prototypes, adding methods, or normalizing
+        data after deserialization.
 
 Returns **any** The memoized value, automatically synchronized between server and client.
 
